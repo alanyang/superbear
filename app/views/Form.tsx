@@ -17,7 +17,7 @@ export const Input = props => {
 export const TextArea = props => {
   const { theme } = useContext(AppearanceContext)
   return (
-    <textarea {...props} className={`${colors[theme]} border-blue-500 border m-1 p-2 rounded active:border-blue-200 hover:border-blue-300 focus:border-blue-200 focus:outline-none`} />
+    <textarea {...props} className={`${colors[theme]} w-full border-blue-500 border m-1 p-2 rounded active:border-blue-200 hover:border-blue-300 focus:border-blue-200 focus:outline-none`} />
   )
 }
 
@@ -38,6 +38,9 @@ export const Button = props => {
       break
     case 'extralarge':
       size = 'px-12 py-3 font-bold text-xl'
+      break
+    case 'full':
+      size = 'font-normal py-1 font-light text-base w-full'
       break
   }
 
