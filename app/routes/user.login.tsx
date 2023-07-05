@@ -1,11 +1,22 @@
 //@ts-nocheck
 
 import { ActionArgs, LoaderArgs, json, redirect } from "@remix-run/node"
-import { useFetcher, useLoaderData } from "@remix-run/react"
+import { Link, useFetcher, useLoaderData } from "@remix-run/react"
+import { withZod } from "@remix-validated-form/with-zod"
 import { useEffect, useState } from "react"
 import { commitSession, getSession } from "~/session"
 import { cryptoPassword } from "~/utils/crypto.server"
 import { prisma } from "~/utils/db.server"
+import { Input, Submit, Password } from "~/views/Form"
+import { z } from 'zod'
+import { ValidatedForm, useIsSubmitting } from "remix-validated-form"
+
+export const LoginValidator = withZod(
+  z.object({
+    email: z.string().email(),
+    password: z.string().min(6),
+  })
+)
 
 export async function loader({ request }: LoaderArgs) {
   const session = await getSession(request.headers.get('Cookie'))
@@ -20,13 +31,17 @@ export async function loader({ request }: LoaderArgs) {
 export async function action({ request }: ActionArgs) {
   const formData = await request.formData()
 
-  const { email, password } = Object.fromEntries(formData)
-  if (!email) {
-    return json({ ok: 0, reason: 'Email required' })
+  const result = await LoginValidator.validate(formData)
+
+  if (result.error) {
+    return json({
+      ok: 0,
+      reason: Object.entries(result.error.fieldErrors).map(([field, err]) => `<div>${field.toUpperCase()}:${err}</div>`).join('')
+    })
   }
-  if (!password) {
-    return json({ ok: 0, reason: 'Password required' })
-  }
+
+  const { email, password } = result.data
+
 
   const user = await prisma.user.findFirst({ where: { email, password: cryptoPassword(password) }, select: { id: true, email: true, name: true } })
   if (!user) {
@@ -36,38 +51,72 @@ export async function action({ request }: ActionArgs) {
   const session = await getSession(request.headers.get('Cookie'))
   session.set('user', JSON.stringify(user))
 
+  // await new Promise(r => setTimeout(r, 2000))
   return redirect('/', { headers: { 'Set-Cookie': await commitSession(session) } })
 }
+
+
 
 export default () => {
 
   useLoaderData()
 
   const loginClient = useFetcher()
-  const [reason, setReason] = useState('')
+  const [reason, setReason] = useState([])
 
   useEffect(() => {
-    if (loginClient.state === 'idle') {
-      // console.log(loginClient.data)
-      !loginClient.data?.ok && setReason(loginClient.data?.reason)
+    if (loginClient.state === 'idle' && !loginClient.data?.ok) {
+      if (loginClient.data?.reason) setReason(loginClient.data?.reason)
     }
   })
 
   return (
     <div className="flex justify-center">
-      <loginClient.Form method="post" onChange={event => setReason('')} className="flex flex-col gap-3 w-96 mt-48 p-5 rounded shadow-salt-400 shadow-lg border border-slate-100">
-        <h3 className="text-3xl font-black pb-3">Login to Superbear</h3>
-        <input type="text" placeholder="Email" name="email" className="border-blue-500 border m-1 p-2 rounded active:border-blue-200 hover:border-blue-300 focus:border-blue-200 focus:outline-none" />
-        <input type="password" placeholder="password" name="password" className="border-blue-500 border m-1 p-2 rounded active:border-blue-200 hover:border-blue-300 focus:border-blue-200 focus:outline-none" />
-        <button type="submit" className="bg-blue-500 font-normal  m-1 p-2 rounded active:bg-blue-200 hover:bg-blue-300 focus:bg-blue-200 text-white px-3">Login</button>
+      <loginClient.Form method="post" onChange={e => setReason('')} className="flex flex-col font-thin gap-3 w-96 mt-48 p-5 rounded shadow-salt-0 shadow-lg border border-slate-100">
+        <h3 className="text-3xl font-semibold pb-3">Login to Superbear</h3>
+        <div className="flex flex-col">
+          <label htmlFor="em" className="px-2 font-extralight">Email</label>
+          <input type="text" placeholder="Enter your email" name="email" id="em"
+            className="border-blue-500 border m-1 p-2 rounded active:border-blue-200 hover:border-blue-300 focus:border-blue-200 focus:outline-none" />
+        </div>
+        <div className="flex flex-col">
+          <label htmlFor="pw" className="px-2 font-extralight">Password</label>
+          <input type="password" name="password" id="pw" placeholder="Enter your password"
+            className="border-blue-500 border m-1 p-2 rounded active:border-blue-200 hover:border-blue-300 focus:border-blue-200 focus:outline-none" />
+        </div>
+        <div className="flex justify-end items-center gap-1 font-thin pt-2">
+          <Link to="/" className="font-thin underline pr-4 text-sm pt-1">Cancel</Link>
+          <Link to="/user/signup" className="bg-slate-400 m-1 rounded  hover:bg-slate-600 text-white px-2 py-1 font-thin">Sign up</Link>
+          <button type="submit" className="bg-blue-500 font-normal  m-1 px-7 py-1 rounded hover:bg-blue-300 text-white">Login</button>
+        </div>
         {
-          reason && <div className="text-red-500">{reason}</div>
+          reason && <div className="text-red-500 text-xs" dangerouslySetInnerHTML={{ __html: reason }} />
         }
         {
           loginClient.state === 'submitting' && <div className="text-blue-500">...</div>
         }
       </loginClient.Form>
 
+      {/* <LoginForm /> */}
+    </div>
+  )
+}
+
+const LoginForm = () => {
+  const isSubmitting = useIsSubmitting('loginForm')
+  return (
+    <div className="flex flex-col gap-3 w-96 mt-48 p-5 rounded shadow-salt-400 shadow-lg border border-slate-100">
+      <h3 className="text-3xl font-black pb-3">Login to Superbear</h3>
+      <ValidatedForm validator={LoginValidator} id="loginForm"
+        method="post">
+        <Input name="email" label="Email" />
+        <Password name="password" label="Password" />
+
+        <div className="flex justify-end items-end gap-1 font-thin pt-2">
+          <Link to="/" className="bg-slate-400 m-1 p-0.5 rounded  hover:bg-slate-600 text-white px-2 py-1 font-thin">Cancel</Link>
+          <Submit label="Login" className="float-right" isSubmitting={isSubmitting} />
+        </div>
+      </ValidatedForm>
     </div>
   )
 }

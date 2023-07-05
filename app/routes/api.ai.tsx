@@ -7,7 +7,6 @@ export async function loader({ request }: LoaderArgs) {
 }
 
 export async function action({ request }: ActionArgs) {
-  return json({
-    name: 'action'
-  })
+  const { method }= request
+  return json({ method })
 }
