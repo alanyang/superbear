@@ -2,7 +2,8 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextIndex"]
 }
 
 datasource db {
@@ -18,30 +19,43 @@ model User {
   password    String
   posts       Post[]
   comments    Comment[]
+  // roles       Role[]
   tags        Tag[]
+  profile     Profile?
   createAt    DateTime  @default(now())
   updateAt    DateTime? @updatedAt
   lastLoginAt DateTime?
+  profileId   String?
+}
+
+model Profile {
+  id     String  @id @default(uuid())
+  avatar String? @db.Text
+  phone  String? @db.VarChar(36)
+  userId String  @unique
+  user   User    @relation(fields: [userId], references: [id])
 }
 
 model Post {
   id       String    @id @default(uuid())
-  title    String    @db.Text()
-  content  String    @db.LongText()
+  title    String    @db.VarChar(2048)
+  content  String    @db.Text
   comments Comment[]
   tags     Tag[]
-  User     User?     @relation(fields: [userId], references: [id])
+  author   User?     @relation(fields: [userId], references: [id])
   userId   String?
   createAt DateTime  @default(now())
   updateAt DateTime? @updatedAt
+
+  @@fulltext([title, content])
 }
 
 model Comment {
   id       String    @id @default(uuid())
   content  String    @db.Text()
-  Post     Post?     @relation(fields: [postId], references: [id])
+  post     Post?     @relation(fields: [postId], references: [id])
   postId   String?
-  User     User?     @relation(fields: [userId], references: [id])
+  creator  User?     @relation(fields: [userId], references: [id])
   userId   String?
   createAt DateTime  @default(now())
   updateAt DateTime? @updatedAt
@@ -51,8 +65,39 @@ model Tag {
   id       String    @id @default(uuid())
   name     String    @unique @db.VarChar(128)
   posts    Post[]
-  User     User?     @relation(fields: [userId], references: [id])
+  creator  User?     @relation(fields: [userId], references: [id])
   userId   String?
   createAt DateTime  @default(now())
   updateAt DateTime? @updatedAt
 }
+
+// model Role {
+//   id             String          @id @default(uuid())
+//   name           String          @unique @db.VarChar(64)
+//   description    String          @db.Text
+//   users          User[]
+//   permissions    Permission[]
+//   urlPermissions UrlPermission[]
+//   createAt       DateTime        @default(now())
+// }
+
+// model Permission {
+//   id          String   @id @default(uuid())
+//   name        String?  @db.VarChar(64)
+//   description String?  @db.Text
+//   table       String   @db.VarChar(64) //table name, if is * mean all table
+//   item        String?  @db.VarChar(72) //col id ,if null mean all table
+//   model       String   @db.VarChar(16) //like unix chmod, not execution flag. 2 only write, 4 only read, 6 write read
+//   roles       Role[]
+//   createAt    DateTime @default(now())
+// }
+
+// model UrlPermission {
+//   id          String   @id @default(uuid())
+//   name        String?  @db.VarChar(64)
+//   description String?  @db.Text
+//   url         String   @db.Text //relative url， example /user/$id /post/$id , * mean all url
+//   model       String   @db.VarChar(16) //like unix chmod, not execution flag. 0 forbidden, 4 allow
+//   roles       Role[]
+//   createAt    DateTime @default(now())
+// }

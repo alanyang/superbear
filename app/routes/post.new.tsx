@@ -1,31 +1,17 @@
 //@ts-nocheck
-import * as _ from 'lodash'
 import { ActionArgs, LoaderArgs, json, redirect } from "@remix-run/node"
 import { Link, useFetcher, useLoaderData } from "@remix-run/react"
-import { withZod } from "@remix-validated-form/with-zod"
-import { z } from 'zod'
 import { useEffect, useState } from "react"
 import { getCurrentUser } from "~/session"
 import { prisma } from "~/utils/db.server"
-import Header from "~/views/Header"
+import { userLoader } from "~/utils/loader.server"
+import { PostValidator } from '~/utils/validtor'
 
+export const loader = async ({ request, context }: LoaderArgs) => {
+  const { user } = await userLoader({ request, context })
+  if (!user) return redirect('/user/login?next=/post/new')
 
-const PostValidator = withZod(
-  z.object({
-    title: z.string().min(8).max(1024),
-    content: z.string().min(8).max(65535),
-    tags: z.string().optional().refine(tags => {
-      if (!tags) return true
-      const r = tags.split(',').map(tag => tag.length > 1 && tag.length < 18)
-      return _.every(r)
-    }, { message: 'Invalid tags' })
-  })
-)
-
-export const loader = async ({ request }: LoaderArgs) => {
-  const user = await getCurrentUser(request)
-  if (!user) return redirect('/user/login')
-  return json({ user })
+  return json({ ok: 1, user })
 }
 
 export const action = async ({ request }: ActionArgs) => {
@@ -41,11 +27,11 @@ export const action = async ({ request }: ActionArgs) => {
     })
   }
   const { title, content } = result.data
-  const tags = result.data.tags.split(',')
+  const tags = result.data.tags.split(',').map(t => t.toLowerCase())
 
   const data = {
     title, content,
-    User: {
+    author: {
       connect: { id: user.id }
     }
   }
@@ -68,9 +54,9 @@ export const action = async ({ request }: ActionArgs) => {
 }
 
 export default () => {
-  const { user } = useLoaderData()
-  const postClient = useFetcher()
+  useLoaderData() //check login
 
+  const postClient = useFetcher()
 
   const [reason, setReason] = useState('')
   const [content, setContent] = useState('')
@@ -83,17 +69,16 @@ export default () => {
 
   return (
     <div>
-      <Header user={user} />
       <div className="flex justify-center">
         <postClient.Form method="post" onChange={event => setReason('')}
           className="flex flex-col gap-3 w-1/2 mt-5 p-5 rounded shadow-salt-400  border-slate-100">
           <h3 className="text-xl font-bold pb-2">Write your post</h3>
           <input type="text" placeholder="Title" name="title" className="border-blue-500 border m-1 p-2 rounded active:border-blue-200 hover:border-blue-300 focus:border-blue-200 focus:outline-none" />
 
-          <textarea placeholder="Post content" maxLength="800" rows="8" onChange={event => setContent(event.currentTarget.value)}
+          <textarea placeholder="Post content" maxLength="65535" rows="8" onChange={event => setContent(event.currentTarget.value)}
             className="border-blue-500 border m-1 p-2 rounded active:border-blue-200 hover:border-blue-300 focus:border-blue-200 focus:outline-none" />
 
-          <input type="text" placeholder="Tags" name="tags" className="border-blue-500 border m-1 p-2 rounded active:border-blue-200 hover:border-blue-300 focus:border-blue-200 focus:outline-none" />
+          <input type="text" placeholder="Tags separate with ," name="tags" className="border-blue-500 border m-1 p-2 rounded active:border-blue-200 hover:border-blue-300 focus:border-blue-200 focus:outline-none" />
 
           <input type="hidden" name="content" value={content} />
 

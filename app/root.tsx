@@ -13,37 +13,58 @@ import {
 import { useState } from "react";
 
 import tailwind from '~/tailwind.css'
-import { themeCookie } from "./cookie"
-import ThemeContext from "~/utils/theme"
+import { themeCookie, viewCookie } from "./cookie"
+import { AppearanceContext, UserContext } from "~/utils/context"
+import { userLoader } from "./utils/loader.server";
+import Header from "./views/Header";
+
+const invalidViews = ['grid', 'list']
+const invalidTheme = ['light', 'dark']
 
 export const links: LinksFunction = () => [
   { rel: 'stylesheet', href: tailwind }
 ];
 
-export const loader = async ({ request }: LoaderArgs) => {
+export const loader = async ({ request, context }: LoaderArgs) => {
   const cookieHeader = request.headers.get('Cookie')
   const theme = (await themeCookie.parse(cookieHeader)) || 'light'
-  return json({ theme })
+  const view = (await viewCookie.parse(cookieHeader)) || 'grid'
+  const { user } = await userLoader({ request, context })
+  return json({ theme, view, user })
 }
 
 export const action = async ({ request }: ActionArgs) => {
   const data = await request.formData()
-  const { theme } = Object.fromEntries(data)
-  return json({ ok: 0 }, { headers: { "Set-Cookie": await themeCookie.serialize(theme) } })
+  const { theme, view, _action } = Object.fromEntries(data)
+  switch (_action) {
+    case 'changeTheme':
+      if (invalidTheme.includes(theme))
+        return json({ ok: 0 }, { headers: { "Set-Cookie": await themeCookie.serialize(theme) } })
+    case 'changeView':
+      if (invalidViews.includes(view))
+        return json({ ok: 0 }, { headers: { "Set-Cookie": await viewCookie.serialize(view) } })
+  }
+
 }
 
 export default function App() {
-  const data = useLoaderData()
-  console.log(data, 'loader')
+  const { user, ...data } = useLoaderData()
   const [theme, setTheme] = useState(data.theme)
-  console.log(theme)
-  const color = theme === 'light' ? 'bg-white text-slate-900' : 'bg-slate-900 text-slate-300'
+  const [view, setView] = useState(data.view)
+
+  const color = theme === 'light' ? 'bg-white text-slate-900' : 'bg-slate-900 text-slate-100'
 
   const fetcher = useFetcher()
   const changeTheme = theme => {
     setTheme(theme)
-    fetcher.submit({ theme }, { method: 'post' })
+    fetcher.submit({ theme, _action: 'changeTheme' }, { method: 'post' })
   }
+
+  const changeView = view => {
+    setView(view)
+    fetcher.submit({ view, _action: 'changeView' }, { method: 'post' })
+  }
+
   return (
     <html lang="en">
       <head>
@@ -52,17 +73,19 @@ export default function App() {
         <Meta />
         <Links />
       </head>
-      <ThemeContext.Provider value={{ theme, setTheme: changeTheme }}>
-        <body className={color}>
-          <main className={`px-8 py-5 w-full h-full ease-in duration-300`}>
-            <Outlet />
-          </main>
-
-          <ScrollRestoration />
-          <Scripts />
-          <LiveReload />
-        </body>
-      </ThemeContext.Provider>
+      <AppearanceContext.Provider value={{ theme, changeTheme, view, changeView }}>
+        <UserContext.Provider value={{ user }}>
+          <body className={`${color} no-scrollbar`}>
+            <main className={`px-8 py-5 w-full h-full ease-in-out duration-200`}>
+              <Header user={user} showSwither={{ view: true, theme: true }} />
+              <Outlet />
+            </main>
+            <ScrollRestoration />
+            <Scripts />
+            <LiveReload />
+          </body>
+        </UserContext.Provider>
+      </AppearanceContext.Provider>
 
     </html>
   );
