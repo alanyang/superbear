@@ -1,5 +1,4 @@
-//@ts-nocheck
-import { ActionArgs, json, type LinksFunction, type LoaderArgs } from "@remix-run/node"
+import { LoaderArgs, type LinksFunction, json, V2_MetaFunction } from "@remix-run/node"
 import {
   Links,
   LiveReload,
@@ -10,61 +9,51 @@ import {
   useFetcher,
   useLoaderData,
 } from "@remix-run/react";
-import { useState } from "react";
 
-import tailwind from '~/tailwind.css'
-import { themeCookie, viewCookie } from "./cookie"
-import { AppearanceContext, UserContext } from "~/utils/context"
+import css from '~/global.css'
+import { themeCookie, viewCookie } from "./cookie";
 import { userLoader } from "./utils/loader.server";
+import { useState } from "react";
+import { AppearanceContext, UserContext } from "./utils/context";
 import Header from "./views/Header";
 
-const invalidViews = ['grid', 'list']
-const invalidTheme = ['light', 'dark']
-
 export const links: LinksFunction = () => [
-  { rel: 'stylesheet', href: tailwind }
+  { rel: 'stylesheet', href: css }
 ];
 
-export const loader = async ({ request, context }: LoaderArgs) => {
+export const meta: V2_MetaFunction = () => {
+  return [
+    { title: "Superbear discuss" },
+    { name: "Superbear discuss", content: "Discuss any issues freely and openly" },
+  ];
+};
+
+export const loader = async (args: LoaderArgs) => {
+  const { request } = args
   const cookieHeader = request.headers.get('Cookie')
   const theme = (await themeCookie.parse(cookieHeader)) || 'light'
   const view = (await viewCookie.parse(cookieHeader)) || 'grid'
-  const { user } = await userLoader({ request, context })
-  return json({ theme, view, user })
-}
-
-export const action = async ({ request }: ActionArgs) => {
-  const data = await request.formData()
-  const { theme, view, _action } = Object.fromEntries(data)
-  switch (_action) {
-    case 'changeTheme':
-      if (invalidTheme.includes(theme))
-        return json({ ok: 0 }, { headers: { "Set-Cookie": await themeCookie.serialize(theme) } })
-    case 'changeView':
-      if (invalidViews.includes(view))
-        return json({ ok: 0 }, { headers: { "Set-Cookie": await viewCookie.serialize(view) } })
-  }
-
+  const { user } = await userLoader(args)
+  return json({ theme, view, user, env: process.env.NODE_ENV })
 }
 
 export default function App() {
-  const { user, ...data } = useLoaderData()
+  const { user, env, ...data } = useLoaderData()
   const [theme, setTheme] = useState(data.theme)
   const [view, setView] = useState(data.view)
 
-  const color = theme === 'light' ? 'bg-white text-slate-900' : 'bg-slate-900 text-slate-100'
+  const color = theme === 'light' ? 'bg-white text-slate-900' : 'bg-slate-900 text-slate-200'
 
   const fetcher = useFetcher()
   const changeTheme = theme => {
     setTheme(theme)
-    fetcher.submit({ theme, _action: 'changeTheme' }, { method: 'post' })
+    fetcher.submit({ theme, _action: 'changeTheme' }, { method: 'post', action: '/api/appearance' })
   }
 
   const changeView = view => {
     setView(view)
-    fetcher.submit({ view, _action: 'changeView' }, { method: 'post' })
+    fetcher.submit({ view, _action: 'changeView' }, { method: 'post', action: '/api/appearance' })
   }
-
   return (
     <html lang="en">
       <head>
@@ -75,8 +64,8 @@ export default function App() {
       </head>
       <AppearanceContext.Provider value={{ theme, changeTheme, view, changeView }}>
         <UserContext.Provider value={{ user }}>
-          <body className={`${color} no-scrollbar`}>
-            <main className={`px-8 py-5 w-full h-full ease-in-out duration-200`}>
+          <body className={`no-scrollbar w-full min-h-full ease-in-out duration-300 ${color}`}>
+            <main className="h-full">
               <Header user={user} showSwither={{ view: true, theme: true }} />
               <Outlet />
             </main>

@@ -1,6 +1,6 @@
 //@ts-nocheck
 import { ActionArgs, LoaderArgs, json, redirect } from "@remix-run/node"
-import { getCurrentUser } from "~/session"
+import { getCurrentUser } from "./session.server"
 
 export async function userLoader({ request, context }: LoaderArgs | ActionArgs) {
   if (context.user)

@@ -8,12 +8,10 @@
     "typecheck": "tsc"
   },
   "dependencies": {
-    "@heroicons/react": "^2.0.18",
     "@prisma/client": "^4.16.2",
     "@remix-run/css-bundle": "^1.18.1",
     "@remix-run/node": "^1.18.1",
     "@remix-run/react": "^1.18.1",
-    "@remix-run/serve": "^1.18.1",
     "@remix-validated-form/with-zod": "^2.0.6",
     "isbot": "^3.6.8",
     "moment": "^2.29.4",

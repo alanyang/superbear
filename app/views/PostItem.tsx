@@ -6,17 +6,16 @@ import { useContext } from "react"
 import { AppearanceContext } from "~/utils/context"
 import moment from "moment"
 
-const maxViewLength = 250
+const maxViewLength = 580
 export default ({ id, title, content, author, tags, createAt }: { content: String }) => {
-  const { view, theme } = useContext(AppearanceContext)
+  const { view } = useContext(AppearanceContext)
 
   if (content.length > maxViewLength) content = content.slice(0, maxViewLength) + '...'
 
-  const width = view === 'grid' ? 'w-1/5' : 'w-full'
-  const shadow = theme === 'light' ? 'shadow-gray-200': 'shadow-gray-200'
+  const width = view === 'grid' ? 'sm:w-full md:w-1/2 lg:w-1/3 xl:w-1/4 2xl:w-1/6' : 'w-full'
   
   return (
-    <section className={`flex flex-col ${width} gap-3 p-5 rounded border-slate-100 hover:shadow-lg hover:${shadow} ease-in-out duration-300`}>
+    <section className={`flex flex-col ${width} gap-3 p-5 rounded border-slate-100 hover:shadow-lg hover:shadow-gray-400 ease-in-out duration-300`}>
       <Link to={`/post/${id}`} className="underline font-normal text-xl">{title}</Link>
       <Link to={`/post/${id}`} className="font-thin">{content}</Link>
       <div className="flex flex-wrap gap-1">

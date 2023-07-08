@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { ActionArgs, LoaderArgs, json, redirect } from "@remix-run/node"
+import { ActionArgs, json, redirect } from "@remix-run/node"
 import { Link, useLoaderData } from "@remix-run/react"
 import { useEffect, useState } from "react"
 import { useFetcher } from "react-router-dom"
@@ -24,17 +24,16 @@ export async function action({ request }: ActionArgs) {
 
   const { email, password, name } = result.data
 
-  const user = await prisma.user.create({
-    data: {
-      email, name, password: cryptoPassword(password), nick: name
-    }
-  })
-
-  if (!user) {
-    return json({ ok: 0, reason: 'Email is used' })
+  try {
+    await prisma.user.create({
+      data: {
+        email, name, password: cryptoPassword(password), nick: name
+      }
+    })
+    return redirect('/user/login')
+  } catch (err) {
+    return json({ ok: 0, reason: 'Email is registered' })
   }
-
-  return redirect('/user/login')
 }
 
 export default () => {
@@ -68,8 +67,8 @@ export default () => {
         </div>
         <div className="flex justify-end items-center gap-1 font-thin pt-2">
           <Link to="/" className="font-thin underline pr-4 text-sm pt-1">Cancel</Link>
-          <Link to="/user/login" className="bg-slate-400 m-1 rounded  hover:bg-slate-600 text-white px-2 py-1 font-thin">Login</Link>
-          <button type="submit" className="bg-blue-500 font-normal  m-1 px-7 py-1 rounded hover:bg-blue-300 text-white">Sign up</button>
+          <Link to="/user/login" className="bg-slate-400 m-1 rounded  hover:bg-slate-600 text-white px-2 py-1 font-thin duration-500 ease-in-out">Login</Link>
+          <button type="submit" className="bg-blue-500 font-normal  m-1 px-7 py-1 rounded hover:bg-blue-700 text-white duration-500 ease-in-out">Sign up</button>
         </div>
         {
           reason && <div className="text-red-500 text-xs" dangerouslySetInnerHTML={{ __html: reason }} />
@@ -77,7 +76,7 @@ export default () => {
         {
           signupClient.state === 'submitting' && <div className="text-blue-500">...</div>
         }
-    
+
       </signupClient.Form>
 
 

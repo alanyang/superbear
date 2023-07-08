@@ -6,6 +6,7 @@ module.exports = {
   // serverBuildPath: "build/index.js",
   // publicPath: "/build/",
   serverModuleFormat: "cjs",
+  tailwind: true,
   future: {
     v2_dev: true,
     v2_errorBoundary: true,
@@ -14,5 +15,4 @@ module.exports = {
     v2_normalizeFormMethod: true,
     v2_routeConvention: true,
   },
-  tailwind: true,
 };

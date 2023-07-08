@@ -17,6 +17,8 @@ model User {
   name        String    @db.VarChar(128)
   nick        String?   @db.VarChar(128)
   password    String
+  status      Int       @default(0) //0 unactived, 1 actived, 2 locked
+  avatar      String?   @db.Text
   posts       Post[]
   comments    Comment[]
   // roles       Role[]
@@ -29,11 +31,13 @@ model User {
 }
 
 model Profile {
-  id     String  @id @default(uuid())
-  avatar String? @db.Text
-  phone  String? @db.VarChar(36)
-  userId String  @unique
-  user   User    @relation(fields: [userId], references: [id])
+  id       String    @id @default(uuid())
+  phone    String?   @db.VarChar(36)
+  slogan   String?   @db.Text
+  userId   String    @unique
+  user     User      @relation(fields: [userId], references: [id])
+  createAt DateTime  @default(now())
+  updateAt DateTime? @updatedAt
 }
 
 model Post {

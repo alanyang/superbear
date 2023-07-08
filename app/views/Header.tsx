@@ -1,25 +1,28 @@
 //@ts-nocheck
-import { Form, Link } from "@remix-run/react";
+import { Form, Link, useLocation } from "@remix-run/react";
 import { useContext, useState } from "react";
 
 import { AppearanceContext } from "~/utils/context";
 
 export default ({ user, showSwither }) => {
+  const { pathname } = useLocation()
   return (
-    <div>
+    <div className="sticky top-0 backdrop-blur-sm bg-white/10 p-4 pt-5 border-b">
       <div className="flex justify-between items-center">
         <Link to='/' className="text-4xl font-black">Superbear</Link>
-
-
         {
           user ?
-            <div className="text-sm font-thin flex justify-between">
-              <Link to='/' className="mr-1 hover:underline">HOME</Link>
-              {'/'}
-              <Link to='/tag/all' className="ml-1 hover:underline mr-20">TAGS</Link>
+            <div className="text-sm font-light flex justify-between">
+              <div className="2xs:hidden xs:hidden sm:hidden md:hidden lg:flex xl:flex 2xl:flex">
+                <Link to='/' className="mr-1 hover:underline">HOME</Link>
+                {'/'}
+                <Link to='/tag/all' className="ml-1 hover:underline mr-20">TAGS</Link>
+              </div>
+
               <SwitcherGroup show={showSwither} />
               <Link to="/user/me" className="px-2">{user.name}</Link>
               <Form method="post" action="/user/logout" className="inline">
+                <input type="hidden" value={pathname} name="next" />
                 <button type="submit" className="hover:border-slate-400 border rounded-sm border-slate-200 px-2">Logout</button>
               </Form>
             </div>
@@ -39,7 +42,7 @@ export default ({ user, showSwither }) => {
 const SwitcherGroup = ({ show }) => {
   const { view, theme } = show
   return (
-    <div className="flex justify-between">
+    <div className="2xs:hidden xs:hidden sm:hidden md:hidden lg:flex xl:flex 2xl:flex justify-between">
 
       {
         theme && <ThemeSwither />
@@ -55,8 +58,8 @@ const SwitcherGroup = ({ show }) => {
 const ViewSwither = () => {
   const { view, changeView } = useContext(AppearanceContext)
 
-  const gridBorder = view === 'grid' ? 'border-slate-200' : 'border-slate-50'
-  const listBorder = view === 'list' ? 'border-slate-200' : 'border-slate-50'
+  const gridBorder = view === 'list' ? 'border-slate-500' : 'border-slate-50'
+  const listBorder = view === 'list' ? 'border-slate-500' : 'border-slate-50'
 
   return (
     <div className="pr-5">

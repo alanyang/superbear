@@ -1,6 +1,6 @@
 //@ts-nocheck
 import { ActionArgs, json, redirect, type LoaderArgs } from "@remix-run/node"
-import { Form, Link, useFetcher, useLoaderData, useNavigate } from "@remix-run/react"
+import { Link, useFetcher, useLoaderData } from "@remix-run/react"
 import moment from "moment"
 import { useContext, useRef } from "react"
 import { UserContext } from "~/utils/context"
@@ -110,12 +110,11 @@ const CommentSection = ({ _ref, action }) => (
 
 const UserButtonGroup = ({ id }) => {
   return (
-    <section className="flex flex-col items-center gap-2 my-5">
+    <section className="flex flex-col items-center gap-2 my-5 mx-5">
       <h4>Login for write comment</h4>
       <div className="flex justify-center gap-3">
-
-        <Link to={`/user/login?next=/post/${id}`} className="bg-blue-500  m-1 px-7 py-0.5 rounded hover:bg-blue-300 text-white">Login</Link>
-        <Link to="/user/signup" className="bg-slate-600  m-1 px-7 py-0.5 rounded hover:bg-slate-300 text-white">Signup</Link>
+        <Link to="/user/signup" className="bg-slate-400  m-1 px-7 py-0.5 rounded hover:bg-slate-600 text-white duration-500 ease-in-out">Signup</Link>
+        <Link to={`/user/login?next=/post/${id}`} className="bg-blue-500  m-1 px-7 py-0.5 rounded hover:bg-blue-700 text-white duration-500 ease-in-out">Login</Link>
       </div>
     </section>
 

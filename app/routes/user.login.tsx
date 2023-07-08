@@ -3,7 +3,7 @@
 import { ActionArgs, json, redirect } from "@remix-run/node"
 import { Link, useFetcher, useLoaderData, useSearchParams } from "@remix-run/react"
 import { useEffect, useState } from "react"
-import { commitSession, getSession } from "~/session"
+import { commitSession, getSession } from "~/utils/session.server"
 import { cryptoPassword } from "~/utils/crypto.server"
 import { prisma } from "~/utils/db.server"
 import { loginedRedirect } from "~/utils/loader.server"
@@ -32,7 +32,10 @@ export async function action({ request }: ActionArgs) {
 
   const session = await getSession(request.headers.get('Cookie'))
   session.set('user', JSON.stringify(user))
-  return redirect(next, { headers: { 'Set-Cookie': await commitSession(session) } })
+  await prisma.user.update({where: {id: user.id}, data: {
+    lastLoginAt: new Date()
+  }})
+  return redirect(next || '/', { headers: { 'Set-Cookie': await commitSession(session) } })
 }
 
 
@@ -70,8 +73,8 @@ export default () => {
 
         <div className="flex justify-end items-center gap-1 font-thin pt-2">
           <Link to="/" className="font-thin underline pr-4 text-sm pt-1">Cancel</Link>
-          <Link to="/user/signup" className="bg-slate-400 m-1 rounded  hover:bg-slate-600 text-white px-2 py-1 font-thin">Sign up</Link>
-          <button type="submit" className="bg-blue-500 font-normal  m-1 px-7 py-1 rounded hover:bg-blue-300 text-white">Login</button>
+          <Link to="/user/signup" className="bg-slate-400 m-1 rounded  hover:bg-slate-600 text-white px-2 py-1 font-thin duration-500 ease-in-out">Sign up</Link>
+          <button type="submit" className="bg-blue-500 font-normal  m-1 px-7 py-1 rounded hover:bg-blue-700 text-white duration-500 ease-in-out">Login</button>
         </div>
         {
           reason && <div className="text-red-500 text-xs" dangerouslySetInnerHTML={{ __html: reason }} />

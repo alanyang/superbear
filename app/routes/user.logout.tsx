@@ -1,7 +1,9 @@
+//@ts-nocheck
 import { ActionArgs, redirect } from "@remix-run/node"
-import { destroySession, getSession } from "~/session"
+import { destroySession, getSession } from "~/utils/session.server"
 
 export async function action({ request }: ActionArgs) {
   const session = await getSession(request.headers.get('Cookie'))
-  return redirect('/', {headers: {"Set-Cookie": await destroySession(session)}})
+  const { next } = Object.fromEntries(await request.formData())
+  return redirect(next || '/', { headers: { "Set-Cookie": await destroySession(session) } })
 }

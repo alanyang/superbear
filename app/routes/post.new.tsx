@@ -2,7 +2,7 @@
 import { ActionArgs, LoaderArgs, json, redirect } from "@remix-run/node"
 import { Link, useFetcher, useLoaderData } from "@remix-run/react"
 import { useEffect, useState } from "react"
-import { getCurrentUser } from "~/session"
+import { getCurrentUser } from "~/utils/session.server"
 import { prisma } from "~/utils/db.server"
 import { userLoader } from "~/utils/loader.server"
 import { PostValidator } from '~/utils/validtor'
@@ -84,7 +84,7 @@ export default () => {
 
           <div className="flex justify-end items-end">
             <Link to={'/'} className="mx-2 px-2 font-thin text-sm underline">Cancel</Link>
-            <button type="submit" className="bg-blue-500 m-1 p-0.5 rounded active:bg-blue-200 hover:bg-blue-300 focus:bg-blue-200 text-white px-3 py-1 font-thin ">Submit post</button>
+            <button type="submit" className="bg-blue-500 m-1 p-0.5 rounded active:bg-blue-200 hover:bg-blue-700 focus:bg-blue-200 text-white px-3 py-1 font-thin duration-500 ease-in-out">Submit post</button>
           </div>
 
           {

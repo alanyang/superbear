@@ -31,3 +31,11 @@ export const CommentValidtor = withZod(
     content: z.string().min(5).max(4096)
   })
 )
+
+export const UpdateUserValidor = withZod(
+  z.object({
+    name: z.string().min(2).max(36).optional(),
+    password: z.string().min(6).max(128).optional(),
+  })
+)
+
