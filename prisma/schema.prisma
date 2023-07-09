@@ -3,7 +3,6 @@
 
 generator client {
   provider        = "prisma-client-js"
-  // previewFeatures = ["fullTextIndex"]
 }
 
 datasource db {
@@ -50,8 +49,6 @@ model Post {
   userId   String?
   createAt DateTime  @default(now())
   updateAt DateTime? @updatedAt
-
-  // @@fulltext([title, content])
 }
 
 model Comment {
