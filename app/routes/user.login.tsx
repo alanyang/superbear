@@ -1,5 +1,4 @@
 //@ts-nocheck
-
 import { ActionArgs, json, redirect } from "@remix-run/node"
 import { Link, useFetcher, useLoaderData, useSearchParams } from "@remix-run/react"
 import { useEffect, useState } from "react"
@@ -8,6 +7,7 @@ import { cryptoPassword } from "~/utils/crypto.server"
 import { prisma } from "~/utils/db.server"
 import { loginedRedirect } from "~/utils/loader.server"
 import { LoginValidator } from "~/utils/validtor"
+import { Button, Input } from "~/views/Form"
 
 export const loader = loginedRedirect
 
@@ -55,8 +55,8 @@ export default () => {
 
   return (
     <div className="flex justify-center">
-      <loginClient.Form method="post" onChange={e => setReason('')} className="flex flex-col font-thin gap-3 w-96 mt-32 p-5 rounded shadow-salt-0 shadow-lg border border-slate-200">
-        <h3 className="text-3xl font-semibold pb-3">Login to Superbear</h3>
+      <loginClient.Form method="post" onChange={e => setReason('')} className="flex flex-col font-thin gap-3 w-96 p-5 rounded hover:shadow-xl ease-in-out duration-300">
+        {/* <h3 className="text-3xl font-semibold pb-3">Login to Superbear</h3> */}
         {
           searchParams.has('next') && <input type="hidden" name="next" value={searchParams.get('next')} />
         }
@@ -67,14 +67,15 @@ export default () => {
         </div>
         <div className="flex flex-col">
           <label htmlFor="pw" className="px-2 font-extralight">Password</label>
-          <input type="password" name="password" id="pw" placeholder="Enter your password"
-            className="border-blue-500 border m-1 p-2 rounded active:border-blue-200 hover:border-blue-300 focus:border-blue-200 focus:outline-none" />
+          <Input type="password" name="password" id="pw" placeholder="Enter your password" />
         </div>
 
         <div className="flex justify-end items-center gap-1 font-thin pt-2">
           <Link to="/" className="font-thin underline pr-4 text-sm pt-1">Cancel</Link>
-          <Link to="/user/signup" className="bg-slate-400 m-1 rounded  hover:bg-slate-600 text-white px-2 py-1 font-thin duration-500 ease-in-out">Sign up</Link>
-          <button type="submit" className="bg-blue-500 font-normal  m-1 px-7 py-1 rounded hover:bg-blue-700 text-white duration-500 ease-in-out">Login</button>
+          <Link to="/">
+            <Button _type="info">Sigup</Button>
+          </Link>
+          <Button type="submit" _type="primary">Login</Button>
         </div>
         {
           reason && <div className="text-red-500 text-xs" dangerouslySetInnerHTML={{ __html: reason }} />
@@ -84,26 +85,6 @@ export default () => {
         }
       </loginClient.Form>
 
-      {/* <LoginForm /> */}
     </div>
   )
 }
-
-// const LoginForm = () => {
-//   const isSubmitting = useIsSubmitting('loginForm')
-//   return (
-//     <div className="flex flex-col gap-3 w-96 mt-48 p-5 rounded shadow-salt-400 shadow-lg border border-slate-100">
-//       <h3 className="text-3xl font-black pb-3">Login to Superbear</h3>
-//       <ValidatedForm validator={LoginValidator} id="loginForm"
-//         method="post">
-//         <Input name="email" label="Email" />
-//         <Password name="password" label="Password" />
-
-//         <div className="flex justify-end items-end gap-1 font-thin pt-2">
-//           <Link to="/" className="bg-slate-400 m-1 p-0.5 rounded  hover:bg-slate-600 text-white px-2 py-1 font-thin">Cancel</Link>
-//           <Submit label="Login" className="float-right" isSubmitting={isSubmitting} />
-//         </div>
-//       </ValidatedForm>
-//     </div>
-//   )
-// }

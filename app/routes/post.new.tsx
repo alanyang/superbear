@@ -6,6 +6,7 @@ import { getCurrentUser } from "~/utils/session.server"
 import { prisma } from "~/utils/db.server"
 import { userLoader } from "~/utils/loader.server"
 import { PostValidator } from '~/utils/validtor'
+import { Button, Input, TextArea } from "~/views/Form"
 
 export const loader = async ({ request, context }: LoaderArgs) => {
   const { user } = await userLoader({ request, context })
@@ -73,18 +74,17 @@ export default () => {
         <postClient.Form method="post" onChange={event => setReason('')}
           className="flex flex-col gap-3 w-1/2 mt-5 p-5 rounded shadow-salt-400  border-slate-100">
           <h3 className="text-xl font-bold pb-2">Write your post</h3>
-          <input type="text" placeholder="Title" name="title" className="border-blue-500 border m-1 p-2 rounded active:border-blue-200 hover:border-blue-300 focus:border-blue-200 focus:outline-none" />
+          <Input type="text" placeholder="Title" name="title" />
 
-          <textarea placeholder="Post content" maxLength="65535" rows="8" onChange={event => setContent(event.currentTarget.value)}
-            className="border-blue-500 border m-1 p-2 rounded active:border-blue-200 hover:border-blue-300 focus:border-blue-200 focus:outline-none" />
+          <TextArea placeholder="Write something" maxLength={65535} rows={8} onChange={event => setContent(event.currentTarget.value)} />
 
-          <input type="text" placeholder="Tags separate with ," name="tags" className="border-blue-500 border m-1 p-2 rounded active:border-blue-200 hover:border-blue-300 focus:border-blue-200 focus:outline-none" />
+          <Input type="text" placeholder="Tags separate with ," name="tags" />
 
           <input type="hidden" name="content" value={content} />
 
           <div className="flex justify-end items-end">
             <Link to={'/'} className="mx-2 px-2 font-thin text-sm underline">Cancel</Link>
-            <button type="submit" className="bg-blue-500 m-1 p-0.5 rounded active:bg-blue-200 hover:bg-blue-700 focus:bg-blue-200 text-white px-3 py-1 font-thin duration-500 ease-in-out">Submit post</button>
+            <Button type="submit" _type="primary" _size="medium">Submit post</Button>
           </div>
 
           {

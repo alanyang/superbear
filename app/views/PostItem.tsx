@@ -15,7 +15,7 @@ export default ({ id, title, content, author, tags, createAt }: { content: Strin
   const width = view === 'grid' ? 'sm:w-full md:w-1/2 lg:w-1/3 xl:w-1/4 2xl:w-1/6' : 'w-full'
   
   return (
-    <section className={`flex flex-col ${width} gap-3 p-5 rounded border-slate-100 hover:shadow-lg hover:shadow-gray-400 ease-in-out duration-300`}>
+    <section className={`flex flex-col ${width} gap-3 p-5 rounded hover:shadow-xl ease-in-out duration-300`}>
       <Link to={`/post/${id}`} className="underline font-normal text-xl">{title}</Link>
       <Link to={`/post/${id}`} className="font-thin">{content}</Link>
       <div className="flex flex-wrap gap-1">

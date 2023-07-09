@@ -3,34 +3,41 @@ import { Form, Link, useLocation } from "@remix-run/react";
 import { useContext, useState } from "react";
 
 import { AppearanceContext } from "~/utils/context";
+import { Button } from "./Form";
 
 export default ({ user, showSwither }) => {
   const { pathname } = useLocation()
   return (
-    <div className="sticky top-0 backdrop-blur-sm bg-white/10 p-4 pt-5 border-b">
+    <div className="sticky top-0 backdrop-blur-sm bg-white/10 p-4 pt-5 shadow-sm">
       <div className="flex justify-between items-center">
-        <Link to='/' className="text-4xl font-black">Superbear</Link>
+        <div className="flex gap-12 items-end">
+          <Link to='/' className="text-4xl font-black">Superbear</Link>
+          <div className="2xs:hidden xs:hidden sm:hidden md:hidden lg:flex xl:flex 2xl:flex">
+            <Link to='/' className="mr-1 hover:underline">HOME</Link>
+            {'/'}
+            <Link to='/tag/all' className="ml-1 hover:underline mr-20">TAGS</Link>
+          </div>
+        </div>
+
         {
           user ?
             <div className="text-sm font-light flex justify-between">
-              <div className="2xs:hidden xs:hidden sm:hidden md:hidden lg:flex xl:flex 2xl:flex">
-                <Link to='/' className="mr-1 hover:underline">HOME</Link>
-                {'/'}
-                <Link to='/tag/all' className="ml-1 hover:underline mr-20">TAGS</Link>
-              </div>
 
               <SwitcherGroup show={showSwither} />
               <Link to="/user/me" className="px-2">{user.name}</Link>
               <Form method="post" action="/user/logout" className="inline">
                 <input type="hidden" value={pathname} name="next" />
-                <button type="submit" className="hover:border-slate-400 border rounded-sm border-slate-200 px-2">Logout</button>
+                <Button type="submit" _type="plain">Logout</Button>
               </Form>
             </div>
             :
-            <div className="text-sm float-right font-thin flex justify-between">
+            <div className="text-sm font-light flex justify-between">
+
               <SwitcherGroup show={showSwither} />
               <Link to={'/user/login'}>Login</Link>
-              <Link to={'/user/signup'} className="hover:border-slate-400 border rounded-sm border-slate-200 mx-2 px-2">Sign up</Link>
+              <Link to={'/user/signup'} className="ml-2">
+                <Button _type="plain">Signup</Button>
+              </Link>
             </div>
         }
       </div>

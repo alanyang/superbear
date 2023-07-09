@@ -25,24 +25,25 @@ export const meta: V2_MetaFunction = () => {
   return [
     { title: "Superbear discuss" },
     { name: "Superbear discuss", content: "Discuss any issues freely and openly" },
+    { viewport: "width=device-width,initial-scale=1" },
   ];
 };
 
 export const loader = async (args: LoaderArgs) => {
-  const { request } = args
-  const cookieHeader = request.headers.get('Cookie')
-  const theme = (await themeCookie.parse(cookieHeader)) || 'light'
-  const view = (await viewCookie.parse(cookieHeader)) || 'grid'
-  const { user } = await userLoader(args)
-  return json({ theme, view, user, env: process.env.NODE_ENV })
+    const { request } = args
+    const cookieHeader = request.headers.get('Cookie')
+    const theme = (await themeCookie.parse(cookieHeader)) || 'light'
+    const view = (await viewCookie.parse(cookieHeader)) || 'grid'
+    const { user } = await userLoader(args)
+    return { theme, view, user }
 }
 
-export default function App() {
+export default function App () {
   const { user, env, ...data } = useLoaderData()
   const [theme, setTheme] = useState(data.theme)
   const [view, setView] = useState(data.view)
 
-  const color = theme === 'light' ? 'bg-white text-slate-900' : 'bg-slate-900 text-slate-200'
+  const color = theme === 'light' ? 'bg-white text-slate-900' : 'bg-slate-950 text-slate-200'
 
   const fetcher = useFetcher()
   const changeTheme = theme => {

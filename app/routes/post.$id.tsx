@@ -7,7 +7,7 @@ import { UserContext } from "~/utils/context"
 import { prisma } from "~/utils/db.server"
 import { userLoader } from "~/utils/loader.server"
 import { CommentValidtor } from "~/utils/validtor"
-import CommentItem from "~/views/CommentItem"
+import { AuthButtonGroup, CommentForm, CommentItem } from "~/views/Comment"
 import TagItem from "~/views/TagItem"
 
 export async function loader({ request, params }: LoaderArgs) {
@@ -91,32 +91,9 @@ export default () => {
         }
       </section>
       {
-        user && <CommentSection _ref={contentRef} action={addComment} /> || <UserButtonGroup id={post.id} />
+        user && <CommentForm _ref={contentRef} action={addComment} /> || <AuthButtonGroup id={post.id} />
       }
 
     </div>
-  )
-}
-
-const CommentSection = ({ _ref, action }) => (
-  <section className="flex flex-col">
-    <textarea rows={2} maxLength={4000} ref={_ref} placeholder="Write something"
-      className="border-blue-500 border m-1 p-2 rounded active:border-blue-200 hover:border-blue-300 focus:border-blue-200 focus:outline-none text-slate-500" />
-    <button
-      onClick={action}
-      className="bg-blue-500 m-1 px-7 py-1 rounded hover:bg-blue-300 text-white">Add Comment</button>
-  </section>
-)
-
-const UserButtonGroup = ({ id }) => {
-  return (
-    <section className="flex flex-col items-center gap-2 my-5 mx-5">
-      <h4>Login for write comment</h4>
-      <div className="flex justify-center gap-3">
-        <Link to="/user/signup" className="bg-slate-400  m-1 px-7 py-0.5 rounded hover:bg-slate-600 text-white duration-500 ease-in-out">Signup</Link>
-        <Link to={`/user/login?next=/post/${id}`} className="bg-blue-500  m-1 px-7 py-0.5 rounded hover:bg-blue-700 text-white duration-500 ease-in-out">Login</Link>
-      </div>
-    </section>
-
   )
 }
