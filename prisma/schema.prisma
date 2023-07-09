@@ -51,7 +51,7 @@ model Post {
   createAt DateTime  @default(now())
   updateAt DateTime? @updatedAt
 
-  @@fulltext([title, content])
+  // @@fulltext([title, content])
 }
 
 model Comment {
