@@ -1,11 +1,10 @@
-//@ts-nocheck
 import { ActionArgs, LoaderArgs, json, redirect } from "@remix-run/node"
 import { Link, useFetcher, useLoaderData } from "@remix-run/react"
 import { useContext, useEffect, useState } from "react"
 import { getCurrentUser } from "~/utils/session.server"
 import { prisma } from "~/utils/db.server"
 import { userLoader } from "~/utils/loader.server"
-import { PostValidator } from '~/utils/validtor'
+import { PostValidator } from '~/utils/validator'
 import { Button, Input, TextArea } from "~/views/Form"
 import { TransitionContext } from "~/utils/context"
 
@@ -39,6 +38,7 @@ export const action = async ({ request }: ActionArgs) => {
   }
 
   if (tags) {
+    //@ts-ignore
     data.tags = { connectOrCreate: tags.map(name => ({ where: { name }, create: { name } })) }
     await prisma.user.update({
       where: { id: user.id },

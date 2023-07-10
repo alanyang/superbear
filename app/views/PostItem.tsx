@@ -1,13 +1,13 @@
-//@ts-nocheck
-
 import { Link } from "@remix-run/react"
 import TagItem from "./TagItem"
 import { useContext } from "react"
 import { AppearanceContext } from "~/utils/context"
 import moment from "moment"
 
+
 const maxViewLength = 580
-export default ({ id, title, content, author, tags, createAt }: { content: String }) => {
+//@ts-ignore
+export default ({id, title, content, author, tags, createAt }: { content: String }) => {
   const { view } = useContext(AppearanceContext)
 
   if (content.length > maxViewLength) content = content.slice(0, maxViewLength) + '...'

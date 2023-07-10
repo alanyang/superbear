@@ -1,4 +1,3 @@
-//@ts-nocheck
 import { ActionArgs, json, redirect } from "@remix-run/node"
 import { Link, useFetcher, useLoaderData, useSearchParams } from "@remix-run/react"
 import { useContext, useEffect, useState } from "react"
@@ -6,7 +5,7 @@ import { commitSession, getSession } from "~/utils/session.server"
 import { cryptoPassword } from "~/utils/crypto.server"
 import { prisma } from "~/utils/db.server"
 import { loginedRedirect } from "~/utils/loader.server"
-import { LoginValidator } from "~/utils/validtor"
+import { LoginValidator } from "~/utils/validator"
 import { Button, Input } from "~/views/Form"
 import { TransitionContext } from "~/utils/context"
 
@@ -32,6 +31,7 @@ export async function action({ request }: ActionArgs) {
   }
 
   const session = await getSession(request.headers.get('Cookie'))
+  //@ts-ignore
   session.set('user', JSON.stringify(user))
   await prisma.user.update({where: {id: user.id}, data: {
     lastLoginAt: new Date()
@@ -47,7 +47,7 @@ export default () => {
   const [searchParams] = useSearchParams()
 
   const loginClient = useFetcher()
-  const [reason, setReason] = useState([])
+  const [reason, setReason] = useState('')
 
   const { setTransitionState } = useContext(TransitionContext)
 

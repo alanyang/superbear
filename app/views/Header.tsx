@@ -1,4 +1,3 @@
-//@ts-nocheck
 import { Link, useFetcher, useLocation } from "@remix-run/react";
 import { useContext, useEffect, useState } from "react";
 

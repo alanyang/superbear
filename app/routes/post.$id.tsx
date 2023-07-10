@@ -1,4 +1,3 @@
-//@ts-nocheck
 import { ActionArgs, json, redirect, type LoaderArgs } from "@remix-run/node"
 import { Link, useFetcher, useLoaderData } from "@remix-run/react"
 import moment from "moment"
@@ -6,7 +5,7 @@ import { useContext, useEffect, useRef } from "react"
 import { TransitionContext, UserContext } from "~/utils/context"
 import { prisma } from "~/utils/db.server"
 import { userLoader } from "~/utils/loader.server"
-import { CommentValidtor } from "~/utils/validtor"
+import { CommentValidtor } from "~/utils/validator"
 import { AuthButtonGroup, CommentForm, CommentItem } from "~/views/Comment"
 import TagItem from "~/views/TagItem"
 
@@ -34,7 +33,7 @@ export async function loader({ request, params }: LoaderArgs) {
 export async function action({ request, params, context }: ActionArgs) {
   const form = await request.formData()
   const result = await CommentValidtor.validate(form)
-  const { user } = await userLoader({ request, context })
+  const { user } = await userLoader({ request, context, params })
   const { id } = params
 
   if (!user) return redirect('/user/login')
@@ -65,7 +64,9 @@ export default () => {
   const {setTransitionState} = useContext(TransitionContext)
 
   const addComment = () => {
+    //@ts-ignore
     commentClient.submit({ content: contentRef.current.value }, { method: 'post' })
+    //@ts-ignore
     contentRef.current.value = ''
   }
 

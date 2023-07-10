@@ -1,4 +1,3 @@
-//@ts-nocheck
 import { json, LoaderArgs } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
 import { prisma } from "~/utils/db.server";

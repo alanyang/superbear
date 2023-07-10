@@ -1,4 +1,3 @@
-//@ts-nocheck
 import { createCookieSessionStorage } from "@remix-run/node"; // or cloudflare/deno
 
 type SessionData = {
@@ -34,6 +33,7 @@ const { getSession, commitSession, destroySession } =
 
 export const getCurrentUser = async request => {
   const session = await getSession(request.headers.get('Cookie'))
+  //@ts-ignore
   return session.has('user') && JSON.parse(session.get('user')) || null
 }
 export { getSession, commitSession, destroySession };

@@ -23,7 +23,8 @@ export const CommentForm = ({ _ref, action }) => {
   const color = theme === 'dark'? 'bg-slate-600 text-slate-100': 'bg-slate-100 text-slate-700'
   return (
     <section className="flex flex-col items-center">
-      <TextArea rows={2} maxLength={4000} ref={_ref} placeholder="Write something" />
+      <textarea rows={2} maxLength={4000} ref={_ref} placeholder="Write something"
+      className="w-full border-blue-500 border m-1 p-2 rounded active:border-blue-200 hover:border-blue-300 focus:border-blue-200 focus:outline-none" />
       <Button onClick={action} _type="primary" _size="full">Add Comment</Button>
     </section>
   )

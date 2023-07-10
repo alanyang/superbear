@@ -14,7 +14,7 @@ export const loader = async ({ request }: LoaderArgs) => {
 
   try {
     const posts = await prisma.post.findMany({
-      where: { title: { search }, content: { search } },
+      where: { title: { search: search as string }, content: { search: search as string } },
       select: {
         id: true, title: true, content: true, createAt: true, author: {
           select: { id: true, name: true }

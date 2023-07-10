@@ -1,4 +1,3 @@
-//@ts-nocheck
 import { ActionArgs, LoaderArgs, json, redirect } from "@remix-run/node"
 import { getCurrentUser } from "./session.server"
 
