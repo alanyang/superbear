@@ -9,8 +9,8 @@ import { PostValidator } from '~/utils/validtor'
 import { Button, Input, TextArea } from "~/views/Form"
 import { TransitionContext } from "~/utils/context"
 
-export const loader = async ({ request, context }: LoaderArgs) => {
-  const { user } = await userLoader({ request, context })
+export const loader = async (args: LoaderArgs) => {
+  const { user } = await userLoader(args)
   if (!user) return redirect('/user/login?next=/post/new')
 
   return json({ ok: 1, user })
@@ -35,7 +35,7 @@ export const action = async ({ request }: ActionArgs) => {
     title, content,
     author: {
       connect: { id: user.id }
-    }
+    },
   }
 
   if (tags) {
@@ -52,6 +52,7 @@ export const action = async ({ request }: ActionArgs) => {
   const post = await prisma.post.create({ data })
   if (!post) return json({ ok: 0, reason: 'Database error' })
   
+  await new Promise(r => setTimeout(r, 1500))
   return redirect('/')
 }
 
