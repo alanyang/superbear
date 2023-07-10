@@ -1,12 +1,13 @@
 //@ts-nocheck
 import { ActionArgs, LoaderArgs, json, redirect } from "@remix-run/node"
 import { Link, useFetcher, useLoaderData } from "@remix-run/react"
-import { useEffect, useState } from "react"
+import { useContext, useEffect, useState } from "react"
 import { getCurrentUser } from "~/utils/session.server"
 import { prisma } from "~/utils/db.server"
 import { userLoader } from "~/utils/loader.server"
 import { PostValidator } from '~/utils/validtor'
 import { Button, Input, TextArea } from "~/views/Form"
+import { TransitionContext } from "~/utils/context"
 
 export const loader = async ({ request, context }: LoaderArgs) => {
   const { user } = await userLoader({ request, context })
@@ -50,7 +51,7 @@ export const action = async ({ request }: ActionArgs) => {
   }
   const post = await prisma.post.create({ data })
   if (!post) return json({ ok: 0, reason: 'Database error' })
-
+  
   return redirect('/')
 }
 
@@ -62,7 +63,10 @@ export default () => {
   const [reason, setReason] = useState('')
   const [content, setContent] = useState('')
 
+  const { setTransitionState } = useContext(TransitionContext)
+
   useEffect(() => {
+    setTransitionState(postClient.state)
     if (postClient.state === 'idle' && !postClient.data?.ok) {
       setReason(postClient.data?.reason)
     }
@@ -90,9 +94,7 @@ export default () => {
           {
             reason && <div className="text-red-500 flex justify-end" dangerouslySetInnerHTML={{ __html: reason }}></div>
           }
-          {
-            postClient.state === 'submitting' && <div className="text-blue-500">...</div>
-          }
+          
         </postClient.Form>
       </div>
 

@@ -14,7 +14,7 @@ import css from '~/global.css'
 import { themeCookie, viewCookie } from "./cookie";
 import { userLoader } from "./utils/loader.server";
 import { useState } from "react";
-import { AppearanceContext, UserContext } from "./utils/context";
+import { AppearanceContext, TransitionContext, UserContext } from "./utils/context";
 import Header from "./views/Header";
 
 export const links: LinksFunction = () => [
@@ -30,18 +30,19 @@ export const meta: V2_MetaFunction = () => {
 };
 
 export const loader = async (args: LoaderArgs) => {
-    const { request } = args
-    const cookieHeader = request.headers.get('Cookie')
-    const theme = (await themeCookie.parse(cookieHeader)) || 'light'
-    const view = (await viewCookie.parse(cookieHeader)) || 'grid'
-    const { user } = await userLoader(args)
-    return { theme, view, user }
+  const { request } = args
+  const cookieHeader = request.headers.get('Cookie')
+  const theme = (await themeCookie.parse(cookieHeader)) || 'light'
+  const view = (await viewCookie.parse(cookieHeader)) || 'grid'
+  const { user } = await userLoader(args)
+  return { theme, view, user }
 }
 
 export default function App () {
   const { user, env, ...data } = useLoaderData()
   const [theme, setTheme] = useState(data.theme)
   const [view, setView] = useState(data.view)
+  const [transitionState, setTransitionState] = useState('idle')
 
   const color = theme === 'light' ? 'bg-white text-slate-900' : 'bg-slate-950 text-slate-200'
 
@@ -64,19 +65,21 @@ export default function App () {
         <Links />
       </head>
       <AppearanceContext.Provider value={{ theme, changeTheme, view, changeView }}>
-        <UserContext.Provider value={{ user }}>
-          <body className={`no-scrollbar w-full min-h-full ease-in-out duration-300 ${color}`}>
-            <main className="h-full">
-              <Header user={user} showSwither={{ view: true, theme: true }} />
-              <Outlet />
-            </main>
-            <ScrollRestoration />
-            <Scripts />
-            <LiveReload />
-          </body>
-        </UserContext.Provider>
+        <TransitionContext.Provider value={{ transitionState, setTransitionState }}>
+          <UserContext.Provider value={{ user }}>
+            <body className={`no-scrollbar w-full min-h-full ease-in-out duration-300 ${color}`}>
+              <main className="h-full">
+                <Header user={user} showSwither={{ view: true, theme: true }} />
+                <Outlet />
+              </main>
+              <ScrollRestoration />
+              <Scripts />
+              <LiveReload />
+            </body>
+          </UserContext.Provider>
+        </TransitionContext.Provider>
       </AppearanceContext.Provider>
 
-    </html>
+    </html >
   );
 }

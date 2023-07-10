@@ -1,8 +1,9 @@
 //@ts-nocheck
 import { ActionArgs, json, redirect } from "@remix-run/node"
 import { Link, useLoaderData } from "@remix-run/react"
-import { useEffect, useState } from "react"
+import { useContext, useEffect, useState } from "react"
 import { useFetcher } from "react-router-dom"
+import { TransitionContext } from "~/utils/context"
 import { cryptoPassword } from "~/utils/crypto.server"
 import { prisma } from "~/utils/db.server"
 import { loginedRedirect } from "~/utils/loader.server"
@@ -11,7 +12,7 @@ import { Button, Input } from "~/views/Form"
 
 export const loader = loginedRedirect
 
-export async function action({ request }: ActionArgs) {
+export async function action ({ request }: ActionArgs) {
   const form = await request.formData()
 
   const result = await SignupValidator.validate(form)
@@ -42,7 +43,9 @@ export default () => {
 
   const signupClient = useFetcher()
   const [reason, setReason] = useState('')
+  const { setTransitionState } = useContext(TransitionContext)
   useEffect(() => {
+    setTransitionState(signupClient.state)
     if (signupClient.state === 'idle' && !signupClient.data?.ok) {
       setReason(signupClient.data?.reason)
     }
@@ -71,10 +74,6 @@ export default () => {
         {
           reason && <div className="text-red-500 text-xs" dangerouslySetInnerHTML={{ __html: reason }} />
         }
-        {
-          signupClient.state === 'submitting' && <div className="text-blue-500">...</div>
-        }
-
       </signupClient.Form>
 
 

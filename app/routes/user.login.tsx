@@ -1,13 +1,14 @@
 //@ts-nocheck
 import { ActionArgs, json, redirect } from "@remix-run/node"
 import { Link, useFetcher, useLoaderData, useSearchParams } from "@remix-run/react"
-import { useEffect, useState } from "react"
+import { useContext, useEffect, useState } from "react"
 import { commitSession, getSession } from "~/utils/session.server"
 import { cryptoPassword } from "~/utils/crypto.server"
 import { prisma } from "~/utils/db.server"
 import { loginedRedirect } from "~/utils/loader.server"
 import { LoginValidator } from "~/utils/validtor"
 import { Button, Input } from "~/views/Form"
+import { TransitionContext } from "~/utils/context"
 
 export const loader = loginedRedirect
 
@@ -35,6 +36,7 @@ export async function action({ request }: ActionArgs) {
   await prisma.user.update({where: {id: user.id}, data: {
     lastLoginAt: new Date()
   }})
+
   return redirect(next || '/', { headers: { 'Set-Cookie': await commitSession(session) } })
 }
 
@@ -47,11 +49,15 @@ export default () => {
   const loginClient = useFetcher()
   const [reason, setReason] = useState([])
 
+  const { setTransitionState } = useContext(TransitionContext)
+
   useEffect(() => {
-    if (loginClient.state === 'idle' && !loginClient.data?.ok) {
+    if (loginClient.state === 'idle') {
       if (loginClient.data?.reason) setReason(loginClient.data?.reason)
     }
+    setTransitionState(loginClient.state)
   }, [loginClient])
+
 
   return (
     <div className="flex justify-center">
@@ -80,9 +86,7 @@ export default () => {
         {
           reason && <div className="text-red-500 text-xs" dangerouslySetInnerHTML={{ __html: reason }} />
         }
-        {
-          loginClient.state === 'submitting' && <div className="text-blue-500">...</div>
-        }
+       
       </loginClient.Form>
 
     </div>

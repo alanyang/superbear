@@ -1,14 +1,20 @@
 //@ts-nocheck
-import { Form, Link, useLocation } from "@remix-run/react";
-import { useContext, useState } from "react";
+import { Link, useFetcher, useLocation } from "@remix-run/react";
+import { useContext, useEffect, useState } from "react";
 
-import { AppearanceContext } from "~/utils/context";
+import { AppearanceContext, TransitionContext } from "~/utils/context";
 import { Button } from "./Form";
 
 export default ({ user, showSwither }) => {
   const { pathname } = useLocation()
+  const { setTransitionState }= useContext(TransitionContext)
+  const logoutClient = useFetcher()
+  useEffect(() => {
+    setTransitionState(logoutClient.state)
+  }, [logoutClient])
   return (
     <div className="sticky top-0 backdrop-blur-sm bg-white/10 p-4 pt-5 shadow-sm">
+      <TransitionPanel />
       <div className="flex justify-between items-center">
         <div className="flex gap-12 items-end">
           <Link to='/' className="text-4xl font-black">Superbear</Link>
@@ -25,10 +31,10 @@ export default ({ user, showSwither }) => {
 
               <SwitcherGroup show={showSwither} />
               <Link to="/user/me" className="px-2">{user.name}</Link>
-              <Form method="post" action="/user/logout" className="inline">
+              <logoutClient.Form method="post" action="/user/logout" className="inline">
                 <input type="hidden" value={pathname} name="next" />
                 <Button type="submit" _type="plain">Logout</Button>
-              </Form>
+              </logoutClient.Form>
             </div>
             :
             <div className="text-sm font-light flex justify-between">
@@ -42,7 +48,21 @@ export default ({ user, showSwither }) => {
         }
       </div>
     </div>
+  )
+}
 
+const TransitionPanel = () => {
+  const { transitionState } = useContext(TransitionContext)
+  const position = transitionState === 'idle'? '-right-80': 'right-3'
+  return (
+    <div className={`fixed top-3 ${position} font-light ease-in-out duration-500`}>
+      <div className="flex gap-3 shadow-lg rounded bg-blue-600/90 justify-center text-white p-4">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 animate-spin">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+        </svg>
+        <label className="capitalize">{transitionState}...</label>
+      </div>
+    </div>
   )
 }
 

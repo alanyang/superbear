@@ -2,8 +2,8 @@
 import { ActionArgs, json, redirect, type LoaderArgs } from "@remix-run/node"
 import { Link, useFetcher, useLoaderData } from "@remix-run/react"
 import moment from "moment"
-import { useContext, useRef } from "react"
-import { UserContext } from "~/utils/context"
+import { useContext, useEffect, useRef } from "react"
+import { TransitionContext, UserContext } from "~/utils/context"
 import { prisma } from "~/utils/db.server"
 import { userLoader } from "~/utils/loader.server"
 import { CommentValidtor } from "~/utils/validtor"
@@ -53,6 +53,7 @@ export async function action({ request, params, context }: ActionArgs) {
       creator: { connect: { id: user.id } }
     }
   })
+  
   return redirect(`/post/${id}`)
 }
 
@@ -61,11 +62,15 @@ export default () => {
   const { user } = useContext(UserContext)
   const contentRef = useRef()
   const commentClient = useFetcher()
+  const {setTransitionState} = useContext(TransitionContext)
 
   const addComment = () => {
     commentClient.submit({ content: contentRef.current.value }, { method: 'post' })
     contentRef.current.value = ''
   }
+
+  useEffect(() => setTransitionState(commentClient.state) , [commentClient])
+
   return (
     <div className="flex flex-col mt-5 font-thin">
       <section className="flex justify-between items-end py-3">
@@ -93,7 +98,7 @@ export default () => {
       {
         user && <CommentForm _ref={contentRef} action={addComment} /> || <AuthButtonGroup id={post.id} />
       }
-
+      <commentClient.Form className="hidden"></commentClient.Form>
     </div>
   )
 }
