@@ -1,14 +1,13 @@
 import { Link } from "@remix-run/react"
 import TagItem from "./TagItem"
-import { useContext } from "react"
-import { AppearanceContext } from "~/utils/context"
 import moment from "moment"
+import { useAppearance, useStore } from "~/utils/store"
 
 
 const maxViewLength = 580
 //@ts-ignore
 export default ({id, title, content, author, tags, createAt }: { content: String }) => {
-  const { view } = useContext(AppearanceContext)
+  const view = useStore(useAppearance, state => state.view)
 
   if (content.length > maxViewLength) content = content.slice(0, maxViewLength) + '...'
 
@@ -17,7 +16,7 @@ export default ({id, title, content, author, tags, createAt }: { content: String
   return (
     <section className={`flex flex-col ${width} gap-3 p-5 rounded hover:shadow-xl ease-in-out duration-300`}>
       <Link to={`/post/${id}`} className="underline font-normal text-xl">{title}</Link>
-      <Link to={`/post/${id}`} className="font-thin">{content}</Link>
+      <Link to={`/post/${id}`} className="font-extralight">{content}</Link>
       <div className="flex flex-wrap gap-1">
         {
           tags && tags.map( tag => <TagItem key={tag.id} {...tag} />)

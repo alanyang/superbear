@@ -1,15 +1,15 @@
 import { ActionArgs, json, redirect, type LoaderArgs } from "@remix-run/node"
 import { Link, useFetcher, useLoaderData } from "@remix-run/react"
 import moment from "moment"
-import { useContext, useEffect, useRef } from "react"
-import { TransitionContext, UserContext } from "~/utils/context"
+import { useEffect, useRef } from "react"
 import { prisma } from "~/utils/db.server"
 import { userLoader } from "~/utils/loader.server"
+import { useUIState } from "~/utils/store"
 import { CommentValidtor } from "~/utils/validator"
 import { AuthButtonGroup, CommentForm, CommentItem } from "~/views/Comment"
 import TagItem from "~/views/TagItem"
 
-export async function loader({ request, params }: LoaderArgs) {
+export async function loader ({ request, params, context }: LoaderArgs) {
   const { id } = params
   const post = await prisma.post.findUnique({
     where: { id },
@@ -27,10 +27,11 @@ export async function loader({ request, params }: LoaderArgs) {
       }
     }
   })
-  return json({ ok: 1, post })
+  const user = await userLoader({ request, params, context })
+  return json({ ok: 1, post, user })
 }
 
-export async function action({ request, params, context }: ActionArgs) {
+export async function action ({ request, params, context }: ActionArgs) {
   const form = await request.formData()
   const result = await CommentValidtor.validate(form)
   const { user } = await userLoader({ request, context, params })
@@ -52,16 +53,18 @@ export async function action({ request, params, context }: ActionArgs) {
       creator: { connect: { id: user.id } }
     }
   })
-  
+
+  await new Promise(r => setTimeout(r, 1500))
+
   return redirect(`/post/${id}`)
 }
 
 export default () => {
-  const { post } = useLoaderData()
-  const { user } = useContext(UserContext)
+  const { post, user } = useLoaderData()
   const contentRef = useRef()
   const commentClient = useFetcher()
-  const {setTransitionState} = useContext(TransitionContext)
+
+  const setTransitionState = useUIState(state => state.setTransition)
 
   const addComment = () => {
     //@ts-ignore
@@ -70,10 +73,10 @@ export default () => {
     contentRef.current.value = ''
   }
 
-  useEffect(() => setTransitionState(commentClient.state) , [commentClient])
+  useEffect(() => setTransitionState(commentClient.state), [commentClient])
 
   return (
-    <div className="flex flex-col mt-5 font-thin">
+    <div className="flex flex-col mt-5 font-extralight">
       <section className="flex justify-between items-end py-3">
         <label className="text-xl font-bold">{post.title}</label>
         <label className="text-sm">

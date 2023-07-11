@@ -1,12 +1,12 @@
 import { ActionArgs, LoaderArgs, json, redirect } from "@remix-run/node"
 import { Link, useFetcher, useLoaderData } from "@remix-run/react"
-import { useContext, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { getCurrentUser } from "~/utils/session.server"
 import { prisma } from "~/utils/db.server"
 import { userLoader } from "~/utils/loader.server"
 import { PostValidator } from '~/utils/validator'
 import { Button, Input, TextArea } from "~/views/Form"
-import { TransitionContext } from "~/utils/context"
+import { useUIState } from "~/utils/store"
 
 export const loader = async (args: LoaderArgs) => {
   const { user } = await userLoader(args)
@@ -52,7 +52,6 @@ export const action = async ({ request }: ActionArgs) => {
   const post = await prisma.post.create({ data })
   if (!post) return json({ ok: 0, reason: 'Database error' })
   
-  await new Promise(r => setTimeout(r, 1500))
   return redirect('/')
 }
 
@@ -64,7 +63,7 @@ export default () => {
   const [reason, setReason] = useState('')
   const [content, setContent] = useState('')
 
-  const { setTransitionState } = useContext(TransitionContext)
+  const setTransitionState = useUIState(state => state.setTransition)
 
   useEffect(() => {
     setTransitionState(postClient.state)

@@ -1,15 +1,15 @@
 import { Link, useFetcher, useLocation } from "@remix-run/react";
-import { useContext, useEffect, useState } from "react";
+import { useEffect } from "react";
 
-import { AppearanceContext, TransitionContext } from "~/utils/context";
 import { Button } from "./Form";
+import { useAppearance, useStore, useUIState } from "~/utils/store";
 
 export default ({ user, showSwither }) => {
   const { pathname } = useLocation()
-  const { setTransitionState }= useContext(TransitionContext)
+  const setTransition = useUIState(state => state.setTransition)
   const logoutClient = useFetcher()
   useEffect(() => {
-    setTransitionState(logoutClient.state)
+    setTransition(logoutClient.state)
   }, [logoutClient])
   return (
     <div className="sticky top-0 backdrop-blur-sm bg-white/10 p-4 pt-5 shadow-sm">
@@ -51,8 +51,8 @@ export default ({ user, showSwither }) => {
 }
 
 const TransitionPanel = () => {
-  const { transitionState } = useContext(TransitionContext)
-  const position = transitionState === 'idle'? '-right-80': 'right-3'
+  const  transitionState  = useUIState(state => state.transition)
+  const position = transitionState === 'idle' ? '-right-80' : 'right-3'
   return (
     <div className={`fixed top-3 ${position} font-light ease-in-out duration-500`}>
       <div className="flex gap-3 shadow-lg rounded bg-blue-600/90 justify-center text-white p-4">
@@ -82,7 +82,8 @@ const SwitcherGroup = ({ show }) => {
 }
 
 const ViewSwither = () => {
-  const { view, changeView } = useContext(AppearanceContext)
+  const view = useStore(useAppearance, state => state.view)
+  const changeView = useAppearance(state => state.changeView)
 
   const gridBorder = view === 'list' ? 'border-slate-500' : 'border-slate-50'
   const listBorder = view === 'list' ? 'border-slate-500' : 'border-slate-50'
@@ -104,20 +105,16 @@ const ViewSwither = () => {
 }
 
 const ThemeSwither = () => {
-  const { theme, changeTheme } = useContext(AppearanceContext)
-  const [pos, setPos] = useState(theme == 'light' ? 'left-1' : 'left-2/4')
-  const _changeTheme = () => {
-    if (theme === 'light') {
-      changeTheme('dark')
-      setPos('left-2/4')
-    } else {
-      changeTheme('light')
-      setPos('left-1')
-    }
+  const theme = useStore(useAppearance, state => state.theme)
+  const changeTheme = useAppearance(state => state.changeTheme)
+  const pos = theme === 'light' ? 'left-1' : 'left-2/4'
+  const toggle = () => {
+    const newTheme = theme === "light" ? "dark" : "light";
+    changeTheme(newTheme)
   }
   return (
     <div className="mr-10 relative border border-slate-0 rounded-3xl px-1 py-0.5 w-30 flex justify-between cursor-pointer"
-      onClick={e => _changeTheme()}>
+      onClick={e => toggle()}>
       <label className="pr-3">☀️</label>
       <label>🌙</label>
       <span className={`absolute ${pos} w-5 h-5 border border-slate-200 bg-slate-300 opacity-100 rounded-full ease-linear duration-100 transition-all`}></span>

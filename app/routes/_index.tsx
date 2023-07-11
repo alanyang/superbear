@@ -2,8 +2,7 @@ import { json, LoaderArgs } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
 import { prisma } from "~/utils/db.server";
 import PostItem from "~/views/PostItem";
-import { AppearanceContext } from "~/utils/context";
-import { useContext } from "react";
+import { useAppearance, useStore } from "~/utils/store";
 
 export const loader = async ({ request }: LoaderArgs) => {
   const posts = await prisma.post.findMany({
@@ -16,7 +15,7 @@ export const loader = async ({ request }: LoaderArgs) => {
 
 export default function Index() {
   const { posts } = useLoaderData()
-  const { view } = useContext(AppearanceContext)
+  const view = useStore(useAppearance, state => state.view)
 
   const flex = view === 'grid' ? 'flex' : 'flex-col'
   return (

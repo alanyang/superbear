@@ -1,11 +1,11 @@
 import { ActionArgs, json, redirect } from "@remix-run/node"
 import { Link, useLoaderData } from "@remix-run/react"
-import { useContext, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { useFetcher } from "react-router-dom"
-import { TransitionContext } from "~/utils/context"
 import { cryptoPassword } from "~/utils/crypto.server"
 import { prisma } from "~/utils/db.server"
 import { loginedRedirect } from "~/utils/loader.server"
+import { useUIState } from "~/utils/store"
 import { SignupValidator } from "~/utils/validator"
 import { Button, Input } from "~/views/Form"
 
@@ -42,7 +42,7 @@ export default () => {
 
   const signupClient = useFetcher()
   const [reason, setReason] = useState('')
-  const { setTransitionState } = useContext(TransitionContext)
+  const setTransitionState = useUIState(state => state.setTransition)
   useEffect(() => {
     setTransitionState(signupClient.state)
     if (signupClient.state === 'idle' && !signupClient.data?.ok) {
@@ -65,9 +65,14 @@ export default () => {
           <Input type="password" name="password" id="pw" placeholder="Enter your password" />
         </div>
         <div className="flex justify-end items-center gap-1 font-thin pt-2">
-          <Link to="/" className="font-thin underline pr-4 text-sm pt-1">Cancel</Link>
-          <Button to="/user/login">Login</Button>
-          <Button type="submit" _type="sucess">Sign up</Button>
+          <Link to="/" className="font-thin underline pr-4 text-sm pt-1">
+            Cancel
+          </Link>
+          <Link to="/user/login" className="bg-slate-500 px-7 py-1 font-normal text-base rounded hover:bg-slate-800 text-white duration-500 ease-in-out">
+            Login
+          </Link>
+
+          <Button type="submit" _type="primary">Sign up</Button>
         </div>
         {
           reason && <div className="text-red-500 text-xs" dangerouslySetInnerHTML={{ __html: reason }} />

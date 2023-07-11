@@ -1,7 +1,8 @@
 import { ActionArgs, LoaderArgs, json, redirect } from "@remix-run/node"
 import { getCurrentUser } from "./session.server"
+import { User } from "@prisma/client"
 
-export async function userLoader({ request, context }: LoaderArgs | ActionArgs) {
+export async function userLoader({ request, context }: LoaderArgs | ActionArgs){
   if (context.user)
     return { user: context.user }
 

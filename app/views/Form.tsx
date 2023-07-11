@@ -1,5 +1,4 @@
-import { useContext } from "react"
-import { AppearanceContext } from "~/utils/context"
+import { useAppearance, useStore } from "~/utils/store"
 
 const colors = {
   dark: 'bg-slate-800 text-slate-100',
@@ -8,16 +7,17 @@ const colors = {
 }
 
 export const Input = props => {
-  const { theme } = useContext(AppearanceContext)
+  const theme = useStore(useAppearance, state => state.theme)
+  const color = colors[theme]
   return (
-    <input {...props} className={`${colors[theme]} border-blue-500 border m-1 p-2 rounded hover:border-blue-300 focus:border-blue-200 focus:outline-none`} />
+    <input {...props} className={`${color} border-blue-500 border m-1 p-2 rounded hover:border-blue-300 focus:border-blue-200 focus:outline-none`} autoComplete="new-password"/>
   )
 }
 
 export const TextArea = props => {
-  const { theme } = useContext(AppearanceContext)
+  const theme = useStore(useAppearance, state => state.theme)
   return (
-    <textarea {...props} className={`${colors[theme]} w-full border-blue-500 border m-1 p-2 rounded active:border-blue-200 hover:border-blue-300 focus:border-blue-200 focus:outline-none`} />
+    <textarea {...props} className={`${colors[theme]} border-blue-500 border m-1 p-2 rounded hover:border-blue-300 focus:border-blue-200 focus:outline-none`} />
   )
 }
 

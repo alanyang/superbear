@@ -1,8 +1,8 @@
 import { Link } from "@remix-run/react"
 import moment from "moment"
-import { useContext } from "react"
-import { AppearanceContext } from "~/utils/context"
-import { Button, TextArea } from "./Form"
+import { Button } from "./Form"
+import { useStore } from "zustand"
+import { useAppearance } from "~/utils/store"
 
 export const CommentItem = ({ content, creator, createAt }) => {
   return (
@@ -19,12 +19,12 @@ export const CommentItem = ({ content, creator, createAt }) => {
 }
 
 export const CommentForm = ({ _ref, action }) => {
-  const { theme } = useContext(AppearanceContext)
-  const color = theme === 'dark'? 'bg-slate-600 text-slate-100': 'bg-slate-100 text-slate-700'
+  const theme = useStore(useAppearance, state => state.theme)
+  const color = theme === 'dark' ? 'bg-slate-600 text-slate-100' : 'bg-slate-100 text-slate-700'
   return (
     <section className="flex flex-col items-center">
       <textarea rows={2} maxLength={4000} ref={_ref} placeholder="Write something"
-      className="w-full border-blue-500 border m-1 p-2 rounded active:border-blue-200 hover:border-blue-300 focus:border-blue-200 focus:outline-none" />
+        className={`${color} w-full border-blue-500 border m-1 p-2 rounded active:border-blue-200 hover:border-blue-300 focus:border-blue-200 focus:outline-none`} />
       <Button onClick={action} _type="primary" _size="full">Add Comment</Button>
     </section>
   )
