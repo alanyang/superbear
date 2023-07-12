@@ -6,7 +6,7 @@ import { prisma } from "~/utils/db.server"
 import { userLoader } from "~/utils/loader.server"
 import { PostValidator } from '~/utils/validator'
 import { Button, Input, TextArea } from "~/views/Form"
-import { useUIState } from "~/utils/store"
+import { useUIStore } from "~/utils/store"
 
 export const loader = async (args: LoaderArgs) => {
   const { user } = await userLoader(args)
@@ -51,7 +51,7 @@ export const action = async ({ request }: ActionArgs) => {
   }
   const post = await prisma.post.create({ data })
   if (!post) return json({ ok: 0, reason: 'Database error' })
-  
+
   return redirect('/')
 }
 
@@ -63,10 +63,11 @@ export default () => {
   const [reason, setReason] = useState('')
   const [content, setContent] = useState('')
 
-  const setTransitionState = useUIState(state => state.setTransition)
+  const ui = useUIStore()
 
   useEffect(() => {
-    setTransitionState(postClient.state)
+    // setTransitionState(postClient.state)
+    ui.transition = postClient.state
     if (postClient.state === 'idle' && !postClient.data?.ok) {
       setReason(postClient.data?.reason)
     }
@@ -94,7 +95,7 @@ export default () => {
           {
             reason && <div className="text-red-500 flex justify-end" dangerouslySetInnerHTML={{ __html: reason }}></div>
           }
-          
+
         </postClient.Form>
       </div>
 

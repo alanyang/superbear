@@ -7,7 +7,7 @@ import { prisma } from "~/utils/db.server"
 import { loginedRedirect } from "~/utils/loader.server"
 import { LoginValidator } from "~/utils/validator"
 import { Button, Input } from "~/views/Form"
-import { useUIState } from "~/utils/store"
+import { useUIStore } from "~/utils/store"
 
 export const loader = loginedRedirect
 
@@ -51,13 +51,13 @@ export default () => {
   const loginClient = useFetcher()
   const [reason, setReason] = useState('')
 
-  const setTransitionState = useUIState(state => state.setTransition)
+  const ui = useUIStore()
 
   useEffect(() => {
     if (loginClient.state === 'idle') {
       if (loginClient.data?.reason) setReason(loginClient.data?.reason)
     }
-    setTransitionState(loginClient.state)
+    ui.setTransition(loginClient.state)
   }, [loginClient])
 
 
@@ -69,7 +69,7 @@ export default () => {
         }
         <div className="flex flex-col">
           <label htmlFor="em" className="px-2 font-extralight">Email</label>
-          <Input type="text" placeholder="Enter your email" name="email" id="em"/>
+          <Input type="text" placeholder="Enter your email" name="email" id="em" />
         </div>
         <div className="flex flex-col">
           <label htmlFor="pw" className="px-2 font-extralight">Password</label>

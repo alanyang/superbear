@@ -1,4 +1,4 @@
-import { useAppearance, useStore } from "~/utils/store"
+import { useAppearanceStore } from "~/utils/store"
 
 const colors = {
   dark: 'bg-slate-800 text-slate-100',
@@ -7,17 +7,17 @@ const colors = {
 }
 
 export const Input = props => {
-  const theme = useStore(useAppearance, state => state.theme)
-  const color = colors[theme]
+  const appearance = useAppearanceStore()
+  const color = colors[appearance.theme]
   return (
     <input {...props} className={`${color} border-blue-500 border m-1 p-2 rounded hover:border-blue-300 focus:border-blue-200 focus:outline-none`} autoComplete="new-password"/>
   )
 }
 
 export const TextArea = props => {
-  const theme = useStore(useAppearance, state => state.theme)
+  const appearance = useAppearanceStore()
   return (
-    <textarea {...props} className={`${colors[theme]} border-blue-500 border m-1 p-2 rounded hover:border-blue-300 focus:border-blue-200 focus:outline-none`} />
+    <textarea {...props} className={`${colors[appearance.theme]} border-blue-500 border m-1 p-2 rounded hover:border-blue-300 focus:border-blue-200 focus:outline-none`} />
   )
 }
 

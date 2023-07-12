@@ -4,7 +4,7 @@ import moment from "moment"
 import { useEffect, useRef } from "react"
 import { prisma } from "~/utils/db.server"
 import { userLoader } from "~/utils/loader.server"
-import { useUIState } from "~/utils/store"
+import { useUIStore } from "~/utils/store"
 import { CommentValidtor } from "~/utils/validator"
 import { AuthButtonGroup, CommentForm, CommentItem } from "~/views/Comment"
 import TagItem from "~/views/TagItem"
@@ -54,8 +54,6 @@ export async function action ({ request, params, context }: ActionArgs) {
     }
   })
 
-  await new Promise(r => setTimeout(r, 1500))
-
   return redirect(`/post/${id}`)
 }
 
@@ -63,8 +61,7 @@ export default () => {
   const { post, user } = useLoaderData()
   const contentRef = useRef()
   const commentClient = useFetcher()
-
-  const setTransitionState = useUIState(state => state.setTransition)
+  const ui = useUIStore()
 
   const addComment = () => {
     //@ts-ignore
@@ -73,7 +70,7 @@ export default () => {
     contentRef.current.value = ''
   }
 
-  useEffect(() => setTransitionState(commentClient.state), [commentClient])
+  useEffect(() => { ui.transition = commentClient.state }, [commentClient])
 
   return (
     <div className="flex flex-col mt-5 font-extralight">
