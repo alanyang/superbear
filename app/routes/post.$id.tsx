@@ -4,10 +4,11 @@ import moment from "moment"
 import { useEffect, useRef } from "react"
 import { prisma } from "~/utils/db.server"
 import { userLoader } from "~/utils/loader.server"
-import { useUIStore } from "~/utils/store"
+import { useUIState } from "~/utils/store"
 import { CommentValidtor } from "~/utils/validator"
 import { AuthButtonGroup, CommentForm, CommentItem } from "~/views/Comment"
 import TagItem from "~/views/TagItem"
+import { shallow } from "zustand/shallow"
 
 export async function loader ({ request, params, context }: LoaderArgs) {
   const { id } = params
@@ -46,31 +47,34 @@ export async function action ({ request, params, context }: ActionArgs) {
     })
   }
   const { content } = result.data
-  await prisma.comment.create({
-    data: {
-      content: content.trim(),
-      post: { connect: { id } },
-      creator: { connect: { id: user.id } }
-    }
-  })
 
-  return redirect(`/post/${id}`)
+  try {
+    await prisma.comment.create({
+      data: {
+        content: content.trim(),
+        post: { connect: { id } },
+        creator: { connect: { id: user.id } }
+      }
+    })
+
+    return redirect(`/post/${id}`)
+  } catch (err) {
+    return json({ ok: 0, reason: "Database error" })
+  }
 }
 
 export default () => {
   const { post, user } = useLoaderData()
-  const contentRef = useRef()
+  const contentRef = useRef<HTMLTextAreaElement>()
   const commentClient = useFetcher()
-  const ui = useUIStore()
 
+  const [transition, setTransition] = useUIState(s => [s.transition, s.setTransition], shallow)
   const addComment = () => {
-    //@ts-ignore
     commentClient.submit({ content: contentRef.current.value }, { method: 'post' })
-    //@ts-ignore
     contentRef.current.value = ''
   }
 
-  useEffect(() => { ui.transition = commentClient.state }, [commentClient])
+  useEffect(() => setTransition(commentClient.state), [commentClient])
 
   return (
     <div className="flex flex-col mt-5 font-extralight">

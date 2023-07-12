@@ -6,7 +6,7 @@ import { prisma } from "~/utils/db.server"
 import { userLoader } from "~/utils/loader.server"
 import { PostValidator } from '~/utils/validator'
 import { Button, Input, TextArea } from "~/views/Form"
-import { useUIStore } from "~/utils/store"
+import { useUIState } from "~/utils/store"
 
 export const loader = async (args: LoaderArgs) => {
   const { user } = await userLoader(args)
@@ -40,17 +40,25 @@ export const action = async ({ request }: ActionArgs) => {
   if (tags) {
     //@ts-ignore
     data.tags = { connectOrCreate: tags.map(name => ({ where: { name }, create: { name } })) }
-    await prisma.user.update({
-      where: { id: user.id },
-      data: {
-        tags: {
-          connectOrCreate: tags.map(name => ({ where: { name }, create: { name } }))
+    try {
+      await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          tags: {
+            connectOrCreate: tags.map(name => ({ where: { name }, create: { name } }))
+          }
         }
-      }
-    })
+      })
+    } catch (err) {
+      return json({ ok: 0, reason: "Database error" })
+    }
   }
-  const post = await prisma.post.create({ data })
-  if (!post) return json({ ok: 0, reason: 'Database error' })
+  try {
+    const post = await prisma.post.create({ data })
+    if (!post) return json({ ok: 0, reason: 'Database error' })
+  } catch (err) {
+    return json({ ok: 0, reason: 'Database error' })
+  }
 
   return redirect('/')
 }
@@ -63,11 +71,10 @@ export default () => {
   const [reason, setReason] = useState('')
   const [content, setContent] = useState('')
 
-  const ui = useUIStore()
+  const setTransition = useUIState(s => s.setTransition)
 
   useEffect(() => {
-    // setTransitionState(postClient.state)
-    ui.transition = postClient.state
+    setTransition(postClient.state)
     if (postClient.state === 'idle' && !postClient.data?.ok) {
       setReason(postClient.data?.reason)
     }

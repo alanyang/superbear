@@ -18,8 +18,8 @@ export const CommentItem = ({ content, creator, createAt }) => {
 }
 
 export const CommentForm = ({ _ref, action }) => {
-  const appearance = useAppearanceStore()
-  const color = appearance.theme === 'dark' ? 'bg-slate-600 text-slate-100' : 'bg-slate-100 text-slate-700'
+  const theme = useAppearanceStore(s => s.theme)
+  const color = theme === 'dark' ? 'bg-slate-600 text-slate-100' : 'bg-slate-100 text-slate-700'
   return (
     <section className="flex flex-col items-center">
       <textarea rows={2} maxLength={4000} ref={_ref} placeholder="Write something"

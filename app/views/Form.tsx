@@ -7,17 +7,17 @@ const colors = {
 }
 
 export const Input = props => {
-  const appearance = useAppearanceStore()
-  const color = colors[appearance.theme]
+  const theme = useAppearanceStore(s => s.theme)
+  const color = colors[theme]
   return (
-    <input {...props} className={`${color} border-blue-500 border m-1 p-2 rounded hover:border-blue-300 focus:border-blue-200 focus:outline-none`} autoComplete="new-password"/>
+    <input {...props} className={`${color} border-blue-500 border m-1 p-2 rounded hover:border-blue-300 focus:border-blue-200 focus:outline-none`} autoComplete="new-password" />
   )
 }
 
 export const TextArea = props => {
-  const appearance = useAppearanceStore()
+  const theme = useAppearanceStore(s => s.theme)
   return (
-    <textarea {...props} className={`${colors[appearance.theme]} border-blue-500 border m-1 p-2 rounded hover:border-blue-300 focus:border-blue-200 focus:outline-none`} />
+    <textarea {...props} className={`${colors[theme]} border-blue-500 border m-1 p-2 rounded hover:border-blue-300 focus:border-blue-200 focus:outline-none`} />
   )
 }
 

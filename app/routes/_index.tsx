@@ -15,9 +15,9 @@ export const loader = async ({ request }: LoaderArgs) => {
 
 export default function Index () {
   const { posts } = useLoaderData()
-  const appearance = useAppearanceStore()
+  const view = useAppearanceStore(s => s.view)
 
-  const flex = appearance.view === 'grid' ? 'flex' : 'flex-col'
+  const flex = view === 'grid' ? 'flex' : 'flex-col'
   return (
     <div className="p-4">
       <div className={`${flex} gap-0 mt-5 flex-wrap`}>

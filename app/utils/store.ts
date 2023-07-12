@@ -1,13 +1,8 @@
-import { proxy, subscribe } from "valtio"
-import { useProxy } from "valtio/utils"
+import { create } from "zustand"
+import { useEffect, useState } from "react"
+import { persist } from "zustand/middleware"
+import { shallow } from "zustand/shallow"
 
-export const keyPrefix = "___superbear"
-
-/**
- * useSnapshot scope triggle re-render, just read
- * state.xxx = xxx scope on react component out, just write
- * useProxy include both, auto ensure by scope
- */
 
 type AppearanceState = {
   theme: "dark" | "light" | "system"
@@ -19,47 +14,74 @@ interface AppearanceAction {
   changeView: (view: AppearanceState["view"]) => (AppearanceState & AppearanceAction)
 }
 
+export const useAppearanceState = create<AppearanceState & AppearanceAction>()(
+  persist(
+    (set, get) => ({
+      theme: "light",
+      view: "grid",
+      changeTheme: theme => {
+        set({ theme, view: get().view })
+        return get()
+      },
+      changeView: view => {
+        set({ view, theme: get().theme })
+        return get()
+      }
+    }),
+    { name: "___superbear_appearance" }
+  )
+)
 
-type UIState = {
+interface UIState {
   transition: "idle" | "submitting" | "loading"
   modal: boolean
+  setTransition: (ts: UIState["transition"]) => void
+  toggleModal: () => void
 }
 
-interface UIAction {
-  setTransition: (ts: UIState["transition"]) => (UIState & UIAction)
-  toggleModal: () => (UIState & UIAction)
+export const useUIState = create<UIState>()(
+  (set, get) => ({
+    transition: "idle",
+    modal: false,
+    setTransition: transition => set({ transition, modal: get().modal }),
+    toggleModal: () => set({ transition: get().transition, modal: !get().modal })
+  })
+)
+
+export type User = {
+  id: string,
+  email: string,
+  name?: string
+  avatar?: string
 }
 
-const appearanceState = proxy<AppearanceState & AppearanceAction>({
-  theme: "light",
-  view: "grid",
-  changeTheme: theme => {
-    appearanceState.theme = theme
-    return appearanceState
-  },
-  changeView: view => {
-    appearanceState.view = view
-    return appearanceState
-  }
-})
+interface CurrentState {
+  user?: User
+  setUser: (user: User) => void
+}
 
-//return unsubscribe function, don't use it
-//persist when state changed
-const _ = subscribe(appearanceState, () => {
-  localStorage.setItem(`${keyPrefix}_appearance`, JSON.stringify({ theme: appearanceState.theme, view: appearanceState.view }))
-})
-export const useAppearanceStore = (): (AppearanceAction & AppearanceState) => useProxy(appearanceState)
+export const useCurrent = create<CurrentState>()(
+  persist(
+    (set, get) => ({
+      user: null,
+      setUser: user => set({ user })
+    }),
+    {
+      name: "___superbear_current"
+    }
+  )
+)
 
-const uiState = proxy<UIState & UIAction>({
-  transition: "idle",
-  modal: false,
-  setTransition(transition)  {
-    uiState.transition = transition
-    return this
-  },
-  toggleModal() {
-    uiState.modal = !uiState.modal
-    return this
-  } 
-})
-export const useUIStore = (): (UIState & UIAction) => useProxy(uiState)
+export const useStore = <T, F> (
+  store: (callback: (state: T) => unknown) => unknown,
+  callback: (state: T) => F
+) => {
+  const result = store(callback) as F
+  const [state, setState] = useState<F>()
+
+  useEffect(() => setState(result), [result])
+
+  return state
+}
+
+export const useAppearanceStore = <R> (callback: (state: AppearanceState & AppearanceAction) => R) => useStore(useAppearanceState, callback)

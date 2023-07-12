@@ -5,7 +5,7 @@ import { useFetcher } from "react-router-dom"
 import { cryptoPassword } from "~/utils/crypto.server"
 import { prisma } from "~/utils/db.server"
 import { loginedRedirect } from "~/utils/loader.server"
-import { useUIStore } from "~/utils/store"
+import { useUIState } from "~/utils/store"
 import { SignupValidator } from "~/utils/validator"
 import { Button, Input } from "~/views/Form"
 
@@ -42,9 +42,9 @@ export default () => {
 
   const signupClient = useFetcher()
   const [reason, setReason] = useState('')
-  const ui = useUIStore()
+  const setTransition = useUIState(s => s.setTransition)
   useEffect(() => {
-    ui.transition = signupClient.state
+    setTransition(signupClient.state)
     if (signupClient.state === 'idle' && !signupClient.data?.ok) {
       setReason(signupClient.data?.reason)
     }

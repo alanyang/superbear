@@ -15,11 +15,11 @@ type Post = {
 const maxViewLength = 580
 
 export default ({id, title, content, author, tags, createAt }: Post) => {
-  const appearance = useAppearanceStore()
+  const view = useAppearanceStore( s=> s.view)
 
   if (content.length > maxViewLength) content = content.slice(0, maxViewLength) + '...'
 
-  const width = appearance.view === 'grid' ? 'sm:w-full md:w-1/2 lg:w-1/3 xl:w-1/4 2xl:w-1/6' : 'w-full'
+  const width = view === 'grid' ? 'sm:w-full md:w-1/2 lg:w-1/3 xl:w-1/4 2xl:w-1/6' : 'w-full'
   
   return (
     <section className={`flex flex-col ${width} gap-3 p-5 rounded hover:shadow-xl ease-in-out duration-300`}>

@@ -11,17 +11,7 @@ import {
 import css from '~/global.css';
 import { userLoader } from "./utils/loader.server";
 import Header from "./views/Header";
-import { keyPrefix, useAppearanceStore } from "./utils/store";
-import React, { useEffect } from "react";
-
-//fix valtio useProxy bug, server render
-const useLayoutEffect = React.useLayoutEffect
-if(typeof window !== 'undefined') {
-  React.useLayoutEffect = useLayoutEffect
-  console.log("client")
-} else {
-  React.useLayoutEffect = (callback) => useEffect(callback, [])
-}
+import { useAppearanceStore, useCurrent } from "./utils/store";
 
 
 export const links: LinksFunction = () => [
@@ -40,19 +30,11 @@ export const loader = userLoader
 
 export default function App () {
   const { user } = useLoaderData()
-  const appearance = useAppearanceStore()
+  const theme = useAppearanceStore(state => state.theme)
+  const setUser = useCurrent(state => state.setUser)
+  if (user) setUser(user)
 
-  useEffect(() => {
-    let persist = localStorage.getItem(`${keyPrefix}_appearance`)
-    if (!persist) {
-      localStorage.setItem(`${keyPrefix}_appearance`, JSON.stringify({ theme: appearance.theme, view: appearance.view }))
-    } else {
-      const { theme, view } = JSON.parse(persist)
-      appearance.changeTheme(theme).changeView(view)
-    }
-  }, [])
-
-  const color = appearance.theme === 'light' ? 'bg-white text-slate-900' : 'bg-slate-950 text-slate-200'
+  const color = theme === 'light' ? 'bg-white text-slate-900' : 'bg-slate-950 text-slate-200'
   return (
     <html lang="en">
       <head>

@@ -7,7 +7,7 @@ import { prisma } from "~/utils/db.server"
 import { loginedRedirect } from "~/utils/loader.server"
 import { LoginValidator } from "~/utils/validator"
 import { Button, Input } from "~/views/Form"
-import { useUIStore } from "~/utils/store"
+import { useUIState } from "~/utils/store"
 
 export const loader = loginedRedirect
 
@@ -33,13 +33,17 @@ export async function action ({ request }: ActionArgs) {
   const session = await getSession(request.headers.get('Cookie'))
   //@ts-ignore
   session.set('user', JSON.stringify(user))
-  await prisma.user.update({
-    where: { id: user.id }, data: {
-      lastLoginAt: new Date()
-    }
-  })
+  try {
+    await prisma.user.update({
+      where: { id: user.id }, data: {
+        lastLoginAt: new Date()
+      }
+    })
 
-  return redirect(next || '/', { headers: { 'Set-Cookie': await commitSession(session) } })
+    return redirect(next || '/', { headers: { 'Set-Cookie': await commitSession(session) } })
+  } catch (err) {
+    return json({ ok: 0, reason: "Database error" })
+  }
 }
 
 
@@ -51,13 +55,13 @@ export default () => {
   const loginClient = useFetcher()
   const [reason, setReason] = useState('')
 
-  const ui = useUIStore()
+  const setTransition = useUIState(s => s.setTransition)
 
   useEffect(() => {
     if (loginClient.state === 'idle') {
       if (loginClient.data?.reason) setReason(loginClient.data?.reason)
     }
-    ui.setTransition(loginClient.state)
+    setTransition(loginClient.state)
   }, [loginClient])
 
 
