@@ -7,7 +7,7 @@ import { prisma } from "~/utils/db.server"
 import { loginedRedirect } from "~/utils/loader.server"
 import { LoginValidator } from "~/utils/validator"
 import { Button, Input } from "~/views/Form"
-import { useUIState } from "~/utils/store"
+import { uiState } from "~/utils/store"
 
 export const loader = loginedRedirect
 
@@ -55,13 +55,11 @@ export default () => {
   const loginClient = useFetcher()
   const [reason, setReason] = useState('')
 
-  const setTransition = useUIState(s => s.setTransition)
-
   useEffect(() => {
     if (loginClient.state === 'idle') {
       if (loginClient.data?.reason) setReason(loginClient.data?.reason)
     }
-    setTransition(loginClient.state)
+    uiState.setTransition(loginClient.state)
   }, [loginClient])
 
 

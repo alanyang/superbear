@@ -1,17 +1,17 @@
 import { json, type LoaderArgs, type ActionArgs } from "@remix-run/node"
 import { cryptoPassword } from "~/utils/crypto.server"
 import { prisma } from "~/utils/db.server"
-import { userLoader } from "~/utils/loader.server"
+import { loadUser } from "~/utils/loader.server"
 import { UpdateUserValidor } from "~/utils/validator"
 
 export async function loader (args: LoaderArgs) {
-  const { user } = await userLoader(args)
+  const { user } = await loadUser(args)
   return json({ ok: 1, user })
 }
 
 export async function action (args: ActionArgs) {
   const { request } = args
-  const { user } = await userLoader(args)
+  const { user } = await loadUser(args)
   if (!user) return json({ ok: 0, reason: 'unauth user' })
   const form = await request.formData()
   switch (request.method) {

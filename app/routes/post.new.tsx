@@ -3,13 +3,13 @@ import { Link, useFetcher, useLoaderData } from "@remix-run/react"
 import { useEffect, useState } from "react"
 import { getCurrentUser } from "~/utils/session.server"
 import { prisma } from "~/utils/db.server"
-import { userLoader } from "~/utils/loader.server"
+import { loadUser } from "~/utils/loader.server"
 import { PostValidator } from '~/utils/validator'
 import { Button, Input, TextArea } from "~/views/Form"
-import { useUIState } from "~/utils/store"
+import { uiState, useUI } from "~/utils/store"
 
 export const loader = async (args: LoaderArgs) => {
-  const { user } = await userLoader(args)
+  const { user } = await loadUser(args)
   if (!user) return redirect('/user/login?next=/post/new')
 
   return json({ ok: 1, user })
@@ -71,10 +71,8 @@ export default () => {
   const [reason, setReason] = useState('')
   const [content, setContent] = useState('')
 
-  const setTransition = useUIState(s => s.setTransition)
-
   useEffect(() => {
-    setTransition(postClient.state)
+    uiState.setTransition(postClient.state)
     if (postClient.state === 'idle' && !postClient.data?.ok) {
       setReason(postClient.data?.reason)
     }

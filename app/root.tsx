@@ -9,9 +9,11 @@ import {
 } from "@remix-run/react";
 
 import css from '~/global.css';
-import { userLoader } from "./utils/loader.server";
+import { loadUser } from "./utils/loader.server";
 import Header from "./views/Header";
-import { useAppearanceStore, useCurrent } from "./utils/store";
+import { appearanceState, currentUser, keyPrefix, useAppearance, useCurrent } from "./utils/store";
+import { shallow } from "zustand/shallow";
+import { useEffect } from "react";
 
 
 export const links: LinksFunction = () => [
@@ -26,15 +28,26 @@ export const meta: V2_MetaFunction = () => {
   ];
 };
 
-export const loader = userLoader
+export const loader = loadUser
 
 export default function App () {
   const { user } = useLoaderData()
-  const theme = useAppearanceStore(state => state.theme)
-  const setUser = useCurrent(state => state.setUser)
-  if (user) setUser(user)
+  // const theme = useAppearanceStore(state => state.theme)
+  // const [setUser, changeName] = useCurrent(state => [state.setUser, state.changeName], shallow)
+  const appearance = useAppearance()
+  const current = useCurrent()
+  if (user) currentUser.setUser(user)
 
-  const color = theme === 'light' ? 'bg-white text-slate-900' : 'bg-slate-950 text-slate-200'
+  const color = appearance.theme === 'light' ? 'bg-white text-slate-900' : 'bg-slate-950 text-slate-200'
+
+  useEffect(() => {
+    const data = localStorage.getItem(`${keyPrefix}_appearance`)
+    if (data) {
+      const { theme, view } = JSON.parse(data)
+      appearance.changeTheme(theme).changeView(view)
+    }
+  }, [])
+
   return (
     <html lang="en">
       <head>

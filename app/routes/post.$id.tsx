@@ -3,12 +3,12 @@ import { Link, useFetcher, useLoaderData } from "@remix-run/react"
 import moment from "moment"
 import { useEffect, useRef } from "react"
 import { prisma } from "~/utils/db.server"
-import { userLoader } from "~/utils/loader.server"
-import { useUIState } from "~/utils/store"
+import { loadUser } from "~/utils/loader.server"
 import { CommentValidtor } from "~/utils/validator"
 import { AuthButtonGroup, CommentForm, CommentItem } from "~/views/Comment"
 import TagItem from "~/views/TagItem"
 import { shallow } from "zustand/shallow"
+import { uiState, useUI } from "~/utils/store"
 
 export async function loader ({ request, params, context }: LoaderArgs) {
   const { id } = params
@@ -28,14 +28,14 @@ export async function loader ({ request, params, context }: LoaderArgs) {
       }
     }
   })
-  const user = await userLoader({ request, params, context })
+  const user = await loadUser({ request, params, context })
   return json({ ok: 1, post, user })
 }
 
 export async function action ({ request, params, context }: ActionArgs) {
   const form = await request.formData()
   const result = await CommentValidtor.validate(form)
-  const { user } = await userLoader({ request, context, params })
+  const { user } = await loadUser({ request, context, params })
   const { id } = params
 
   if (!user) return redirect('/user/login')
@@ -68,13 +68,12 @@ export default () => {
   const contentRef = useRef<HTMLTextAreaElement>()
   const commentClient = useFetcher()
 
-  const [transition, setTransition] = useUIState(s => [s.transition, s.setTransition], shallow)
   const addComment = () => {
     commentClient.submit({ content: contentRef.current.value }, { method: 'post' })
     contentRef.current.value = ''
   }
 
-  useEffect(() => setTransition(commentClient.state), [commentClient])
+  useEffect(() => { uiState.setTransition(commentClient.state) }, [commentClient])
 
   return (
     <div className="flex flex-col mt-5 font-extralight">
