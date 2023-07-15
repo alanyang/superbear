@@ -21,12 +21,12 @@ interface AppearanceAction {
 
 type UIState = {
   transition: "idle" | "submitting" | "loading"
-  modal: boolean
+  modal: { avatar: boolean }
 }
 
 interface UIAction {
   setTransition: (ts: UIState["transition"]) => (UIState & UIAction)
-  toggleModal: () => (UIState & UIAction)
+  hiddenModal: () => (UIState & UIAction)
 }
 
 export const appearanceState = proxy<AppearanceState & AppearanceAction>({
@@ -52,14 +52,16 @@ export const useAppearance = (): (AppearanceAction & AppearanceState) => useSnap
 
 export const uiState = proxy<UIState & UIAction>({
   transition: "idle",
-  modal: false,
-  setTransition (transition) {
+  modal: { avatar: false },
+  setTransition: (transition) => {
     uiState.transition = transition
-    return this
+    return uiState
   },
-  toggleModal () {
-    uiState.modal = !uiState.modal
-    return this
+  hiddenModal: () => {
+    Object.keys(uiState.modal).forEach(key => {
+      uiState.modal[key] = false
+    })
+    return uiState
   }
 })
 //export
@@ -82,14 +84,14 @@ interface CurrentUser {
 
 export const currentUser = proxy<CurrentUser>({
   user: null,
-  setUser (user: User) {
-    this.user = user
+  setUser: (user: User) => {
+    currentUser.user = user
   },
-  changeName (name: string) {
-    this.user.name = name
+  changeName: (name: string) => {
+    currentUser.user.name = name
   },
-  changeAvatar (avatar: string) {
-    this.user.avatar = avatar
+  changeAvatar: (avatar: string) => {
+    currentUser.user.avatar = avatar
   }
 })
 

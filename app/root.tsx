@@ -11,7 +11,7 @@ import {
 import css from '~/global.css';
 import { loadUser } from "./utils/loader.server";
 import Header from "./views/Header";
-import { appearanceState, currentUser, keyPrefix, useAppearance, useCurrent } from "./utils/store";
+import { appearanceState, currentUser, keyPrefix, uiState, useAppearance, useCurrent } from "./utils/store";
 import { shallow } from "zustand/shallow";
 import { useEffect } from "react";
 
@@ -34,17 +34,17 @@ export default function App () {
   const { user } = useLoaderData()
   // const theme = useAppearanceStore(state => state.theme)
   // const [setUser, changeName] = useCurrent(state => [state.setUser, state.changeName], shallow)
-  const appearance = useAppearance()
-  const current = useCurrent()
-  if (user) currentUser.setUser(user)
+  const { theme, changeTheme } = useAppearance()
+  currentUser.setUser(user)
 
-  const color = appearance.theme === 'light' ? 'bg-white text-slate-900' : 'bg-slate-950 text-slate-200'
+  const color = theme === 'light' ? 'bg-white text-slate-900' : 'bg-slate-950 text-slate-200'
 
+  let i = 1
   useEffect(() => {
     const data = localStorage.getItem(`${keyPrefix}_appearance`)
     if (data) {
       const { theme, view } = JSON.parse(data)
-      appearance.changeTheme(theme).changeView(view)
+      changeTheme(theme).changeView(view)
     }
   }, [])
 
@@ -56,9 +56,8 @@ export default function App () {
         <Meta />
         <Links />
       </head>
-      <body className={`no-scrollbar w-full min-h-full ease-in-out duration-300 ${color}`}>
+      <body className={`no-scrollbar w-full min-h-full ease-in-out duration-300 ${color}`} onClick={uiState.hiddenModal}>
         <main className="h-full">
-          <Header user={user} showSwither={{ view: true, theme: true }} />
           <Outlet />
         </main>
         <ScrollRestoration />
